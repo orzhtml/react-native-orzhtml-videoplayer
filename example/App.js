@@ -7,9 +7,9 @@
  */
 
 import React, { Component } from 'react'
-import { StyleSheet, View, StatusBar } from 'react-native'
-import Orientation from 'react-native-orientation'
-import { VideoPlayer, defaultVideoHeight, statusBarHeight, screenWidth, screenHeight } from 'react-native-orzhtml-videoplayer'
+import { StyleSheet, View, StatusBar, Dimensions } from 'react-native'
+import Orientation from 'react-native-orientation-locker'
+import { VideoPlayer, defaultVideoHeight, statusBarHeight, screenWidth, screenHeight } from './videoplayer'
 
 export default class App extends Component {
   constructor (props) {
@@ -21,6 +21,7 @@ export default class App extends Component {
       videoTitle: '这是可全屏的播放组件'
     }
     this.isStopPlay = null
+    console.log(Dimensions.get('window').width, Dimensions.get('window').height)
   }
 
   _onVideoFullScreen = (isFullScreen) => {
@@ -35,8 +36,9 @@ export default class App extends Component {
       this.setState({
         isFullScreen: true
       })
+      console.log('screenHeight, screenWidth:', screenHeight, screenWidth)
       this.VideoPlayer.updateLayout(screenHeight, screenWidth, true)
-      Orientation.lockToLandscapeRight()
+      Orientation.lockToLandscapeLeft()
     }
   }
 
@@ -75,14 +77,11 @@ export default class App extends Component {
     const { isPaused, videoUrl, videoImage, videoTitle, isFullScreen } = this.state
     return (
       <View style={styles.container}>
-        {
-          !isFullScreen ? (
-            <View style={{ height: statusBarHeight, backgroundColor: '#fff' }}>
-              <StatusBar translucent barStyle={'dark-content'} />
-            </View>
-          ) : null
-        }
+        <View style={{ height: isFullScreen ? 0 : statusBarHeight, backgroundColor: '#fff' }}>
+          <StatusBar translucent barStyle={'dark-content'} hidden={isFullScreen}/>
+        </View>
         <View style={[{
+          backgroundColor: '#000',
           width: screenWidth,
           height: defaultVideoHeight
         }, isFullScreen ? {

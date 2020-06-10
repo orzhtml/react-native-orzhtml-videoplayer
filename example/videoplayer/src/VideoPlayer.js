@@ -6,7 +6,6 @@ import {
   Dimensions,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -372,8 +371,8 @@ class VideoPlayer extends React.Component {
           playWhenInactive={false}
         />
         {
-          this.state.hasCover && this.state.isShowVideoCover
-            ? <Image
+          this.state.hasCover && this.state.isShowVideoCover ? (
+            <Image
               style={{
                 position: 'absolute',
                 top: 0,
@@ -382,34 +381,36 @@ class VideoPlayer extends React.Component {
                 height: this.state.videoHeight
               }}
               source={{ uri: this.state.videoCover }}
-            /> : null
+            />
+          ) : null
         }
-        <TouchableWithoutFeedback onPress={this._onTapVideo}>
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: this.state.videoWidth,
-              height: this.state.videoHeight,
-              backgroundColor: this.state.isPaused ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            {
-              this.state.isPaused
-                ? <TouchableWithoutFeedback onPress={this._onTapPlayButton}>
-                  <Image
-                    style={styles.playButton}
-                    source={imgSource.icon_video_play}
-                  />
-                </TouchableWithoutFeedback> : null
-            }
-          </View>
-        </TouchableWithoutFeedback>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={this._onTapVideo}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: this.state.videoWidth,
+            height: this.state.videoHeight,
+            backgroundColor: this.state.isPaused ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          {
+            this.state.isPaused ? (
+              <TouchableOpacity activeOpacity={1} onPress={this._onTapPlayButton}>
+                <Image
+                  style={styles.playButton}
+                  source={imgSource.icon_video_play}
+                />
+              </TouchableOpacity>
+            ) : null
+          }
+        </TouchableOpacity>
         {
-          this.state.isShowControl
-            ? <View style={[styles.bottomControl, { width: this.state.videoWidth }]}>
+          this.state.isShowControl ? (
+            <View style={[styles.bottomControl, { width: this.state.videoWidth }]}>
               <Image
                 source={imgSource.img_bottom_shadow}
                 style={{ position: 'absolute', top: 0, left: 0, width: this.state.videoWidth, height: 50 }}
@@ -417,9 +418,7 @@ class VideoPlayer extends React.Component {
               <TouchableOpacity activeOpacity={0.3} onPress={this._onTapPlayButton}>
                 <Image
                   style={styles.control_play_btn}
-                  source={this.state.isPaused
-                    ? imgSource.icon_control_play
-                    : imgSource.icon_control_pause}
+                  source={this.state.isPaused ? imgSource.icon_control_play : imgSource.icon_control_pause}
                 />
               </TouchableOpacity>
               <Text style={styles.timeText}>{formatTime(this.state.currentTime)}</Text>
@@ -435,34 +434,37 @@ class VideoPlayer extends React.Component {
               />
               <Text style={styles.timeText}>{formatTime(this.state.duration)}</Text>
               {
-                this.state.isFullScreen && this.state.isClarity
-                  ? <View style={styles.bottomOptionView}>
+                this.state.isFullScreen && this.state.isClarity ? (
+                  <View style={styles.bottomOptionView}>
                     <TouchableOpacity onPress={this._onTapDefinitionButton}>
                       <Text style={styles.bottomOptionText}>高清</Text>
                     </TouchableOpacity>
                     {
-                      // <TouchableOpacity onPress={this._onTapSelectVideo}>
-                      //   <Text style={[styles.bottomOptionText, { marginLeft: 10 }]}>选集</Text>
-                      // </TouchableOpacity>
+                    // <TouchableOpacity onPress={this._onTapSelectVideo}>
+                    //   <Text style={[styles.bottomOptionText, { marginLeft: 10 }]}>选集</Text>
+                    // </TouchableOpacity>
                     }
-                  </View> : null
+                  </View>
+                ) : null
               }
               {
-                this.props.enableSwitchScreen
-                  ? <TouchableOpacity activeOpacity={0.3} onPress={this._onTapSwitchButton}>
+                this.props.enableSwitchScreen ? (
+                  <TouchableOpacity activeOpacity={0.3} onPress={this._onTapSwitchButton}>
                     <Image
                       style={styles.control_switch_btn}
                       source={this.state.isFullScreen
                         ? imgSource.icon_control_shrink_screen
                         : imgSource.icon_control_full_screen}
                     />
-                  </TouchableOpacity> : null
+                  </TouchableOpacity>
+                ) : null
               }
-            </View> : null
+            </View>
+          ) : null
         }
         {
-          this.state.isFullScreen && this.state.isShowControl
-            ? <View
+          this.state.isFullScreen && this.state.isShowControl ? (
+            <View
               style={{
                 position: 'absolute',
                 top: 0,
@@ -477,65 +479,69 @@ class VideoPlayer extends React.Component {
                 style={{ position: 'absolute', top: 0, left: 0, width: this.state.videoWidth, height: 50 }}
               />
               {
-                this.state.isFullScreen && this.state.isShowControl
-                  ? <TouchableOpacity style={styles.backButton} onPress={this._onTapBackButton}>
+                this.state.isFullScreen && this.state.isShowControl ? (
+                  <TouchableOpacity style={styles.backButton} onPress={this._onTapBackButton}>
                     <Image
                       source={imgSource.icon_back}
                       style={{ width: 26, height: 26 }}
                     />
-                  </TouchableOpacity> : null
+                  </TouchableOpacity>
+                ) : null
               }
               <Text style={styles.videoTitle} numberOfLines={1}>{this.state.videoTitle}</Text>
               {
-                this.state.isFullScreen && (this.state.isCapture || this.state.isAirplay || this.state.isShare || this.state.isMore)
-                  ? <View style={styles.topOptionView}>
-                    {
-                      this.state.isCapture ? (
-                        <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapCaptureImage}>
-                          <Image
-                            source={imgSource.icon_video_capture}
-                            style={{ width: 26, height: 26 }}
-                          />
-                        </TouchableOpacity>
-                      ) : null
-                    }
-                    {
-                      this.state.isAirplay ? (
-                        <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapAirplayButton}>
-                          <Image
-                            source={imgSource.icon_video_airplay}
-                            style={styles.topImageOption}
-                          />
-                        </TouchableOpacity>
-                      ) : null
-                    }
-                    {
-                      this.state.isMore ? (
-                        <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapMoreButton}>
-                          <Image
-                            source={imgSource.icon_video_more}
-                            style={styles.topImageOption}
-                          />
-                        </TouchableOpacity>
-                      ) : null
-                    }
-                    {
-                      this.state.isShare ? (
-                        <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapShareButton}>
-                          <Image
-                            source={imgSource.icon_video_share}
-                            style={{ width: 22, height: 22 }}
-                          />
-                        </TouchableOpacity>
-                      ) : null
-                    }
-                  </View> : null
+                this.state.isFullScreen &&
+                 (this.state.isCapture || this.state.isAirplay || this.state.isShare || this.state.isMore) ? (
+                    <View style={styles.topOptionView}>
+                      {
+                        this.state.isCapture ? (
+                          <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapCaptureImage}>
+                            <Image
+                              source={imgSource.icon_video_capture}
+                              style={{ width: 26, height: 26 }}
+                            />
+                          </TouchableOpacity>
+                        ) : null
+                      }
+                      {
+                        this.state.isAirplay ? (
+                          <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapAirplayButton}>
+                            <Image
+                              source={imgSource.icon_video_airplay}
+                              style={styles.topImageOption}
+                            />
+                          </TouchableOpacity>
+                        ) : null
+                      }
+                      {
+                        this.state.isMore ? (
+                          <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapMoreButton}>
+                            <Image
+                              source={imgSource.icon_video_more}
+                              style={styles.topImageOption}
+                            />
+                          </TouchableOpacity>
+                        ) : null
+                      }
+                      {
+                        this.state.isShare ? (
+                          <TouchableOpacity style={styles.topOptionItem} onPress={this._onTapShareButton}>
+                            <Image
+                              source={imgSource.icon_video_share}
+                              style={{ width: 22, height: 22 }}
+                            />
+                          </TouchableOpacity>
+                        ) : null
+                      }
+                    </View>
+                  ) : null
               }
-            </View> : null
+            </View>
+          ) : null
         }
         {
-          this.state.isFullScreen && this.state.isDefinitionShow
-            ? <SelectDefinitionView
+          this.state.isFullScreen && this.state.isDefinitionShow ? (
+            <SelectDefinitionView
               selectedIndex={2}
               style={{
                 position: 'absolute',
@@ -546,7 +552,8 @@ class VideoPlayer extends React.Component {
               }}
               onItemSelected={(index) => this.onDefinitionItemSelected(index)}
               onCloseWindow={() => { this.setState({ isDefinitionShow: false }) }}
-            /> : null
+            />
+          ) : null
         }
         {
           // this.state.isFullScreen && this.state.isVideoListShow
@@ -564,8 +571,8 @@ class VideoPlayer extends React.Component {
           //   /> : null
         }
         {
-          this.state.isFullScreen && this.state.isShareMenuShow
-            ? <ShareOptionView
+          this.state.isFullScreen && this.state.isShareMenuShow ? (
+            <ShareOptionView
               style={{
                 position: 'absolute',
                 top: 0,
@@ -575,11 +582,12 @@ class VideoPlayer extends React.Component {
               }}
               onShareItemSelected={(index) => { this.onShareMenuPressed(index) }}
               onCloseWindow={() => { this.setState({ isShareMenuShow: false }) }}
-            /> : null
+            />
+          ) : null
         }
         {
-          this.state.isFullScreen && this.state.isSettingViewShow
-            ? <MoreSettingView
+          this.state.isFullScreen && this.state.isSettingViewShow ? (
+            <MoreSettingView
               style={{
                 position: 'absolute',
                 top: 0,
@@ -598,7 +606,8 @@ class VideoPlayer extends React.Component {
               onEndTimeSelected={(index) => { this.onEndTimeChange(index) }}
               onCloseWindow={() => { this.setState({ isSettingViewShow: false }) }}
               onVolumeChange={(volume) => { this.onVolumeChanged(volume) }}
-            /> : null
+            />
+          ) : null
         }
       </View>
     )

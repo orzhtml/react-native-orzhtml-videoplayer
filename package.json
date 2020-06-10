@@ -29,7 +29,7 @@
     "@react-native-community/slider": "*",
     "react": "*",
     "react-native": "*",
-    "react-native-orientation": "*",
+    "react-native-orientation-locker": "*",
     "react-native-video": "*"
   },
   "devDependencies": {
