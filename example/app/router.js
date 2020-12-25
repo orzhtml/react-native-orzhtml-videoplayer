@@ -6,6 +6,7 @@ import {
 } from '@react-navigation/stack'
 
 import Home from './view/home/Home'
+import List from './view/list/List'
 
 const RootStack = createStackNavigator()
 
@@ -21,6 +22,11 @@ function Router () {
     <NavigationContainer>
       <RootStack.Navigator initialRouteName={'Home'} screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Home" component={Home}
+          options={{
+            cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
+          }}
+        />
+        <RootStack.Screen name="List" component={List}
           options={{
             cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
           }}
