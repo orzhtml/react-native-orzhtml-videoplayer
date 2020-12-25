@@ -38,7 +38,7 @@ export function formatTime (second) {
   return result
 }
 
-function Header ({ showStatusBar, statusBar, isFullScreen }) {
+function Header ({ showStatusBar, trans, statusBar, isFullScreen }) {
   if (!showStatusBar) {
     return null
   }
@@ -47,12 +47,14 @@ function Header ({ showStatusBar, statusBar, isFullScreen }) {
     return statusBar
   }
 
+  let backgroundColor = trans ? 'transparent' : '#000'
+
   return (
     <View style={{
-      backgroundColor: '#000',
-      height: isFullScreen ? 0 : statusBarHeight
+      backgroundColor: backgroundColor,
+      height: isFullScreen ? 0 : trans ? 0 : statusBarHeight
     }}>
-      <StatusBar translucent={true} backgroundColor='#000' barStyle={'light-content'} />
+      <StatusBar translucent={true} backgroundColor={backgroundColor} barStyle={'light-content'} />
     </View>
   )
 }
@@ -92,6 +94,24 @@ function Loading ({ showLoading, videoHeight, videoWidth }) {
 const rate = [1, 1.25, 1.5, 1.75, 2]
 
 class VideoPlayer extends React.Component {
+  static defaultProps = {
+    autoPlay: false,
+    showBack: true,
+    enableSwitchScreen: true,
+    statusBarTrans: false,
+    showStatusBar: true,
+    poster: null,
+    muted: false,
+    repeat: false,
+    playInBackground: false,
+    allowsExternalPlayback: false,
+    ignoreSilentSwitch: 'ignore',
+    posterResizeMode: 'cover',
+    resizeMode: 'contain',
+    controls: false,
+    playWhenInactive: true
+  }
+
   constructor (props) {
     super(props)
     this.state = {
@@ -107,7 +127,7 @@ class VideoPlayer extends React.Component {
       duration: 0, // 视频的时长
       currentTime: 0, // 视屏当前播放的时间
       playFromBeginning: false, // 视频是否需要从头开始播放
-      showStatusBar: props.showStatusBar || true
+      showStatusBar: props.showStatusBar
     }
     console.log('screenWidth:', screenWidth)
     console.log('screenHeight:', screenHeight)
@@ -192,17 +212,22 @@ class VideoPlayer extends React.Component {
     }
   }
 
-  // _onBuffer = (e) => {
-  //   console.log('_onBuffer e:', e)
-  // }
-  _animatedonBuffer = (event) => {
+  _onBuffer = (e) => {
+    console.log('_onBuffer e:', e)
     const { onBuffer } = this.props
-    console.log('_animatedonBuffer event:', event)
-    onBuffer && onBuffer(event)
+    onBuffer && onBuffer(e)
     this.setState({
-      showLoading: !!event.isBuffering
+      showLoading: !!e.isBuffering
     })
   }
+  // _animatedonBuffer = (event) => {
+  //   const { onBuffer } = this.props
+  //   console.log('_animatedonBuffer event:', event)
+  //   onBuffer && onBuffer(event)
+  //   this.setState({
+  //     showLoading: !!event.isBuffering
+  //   })
+  // }
 
   _onError = (e) => {
     console.log('_onError e:', e)
@@ -237,16 +262,16 @@ class VideoPlayer extends React.Component {
     })
   }
 
+  _onBackButton = () => {
+    console.log('_onBackButton')
+    const { onBackButton } = this.props
+    onBackButton && onBackButton()
+  }
+
   _onTapBackButton = () => {
     console.log('_onTapBackButton')
-    const { onTapBackButton } = this.props
-    const { isFullScreen } = this.state
-    if (isFullScreen) {
-      this._smallScreen()
-    } else {
-      this._smallScreen()
-      onTapBackButton && onTapBackButton()
-    }
+    // const { onTapBackButton } = this.props
+    this._smallScreen()
   }
 
   _onTapPlayButton = () => {
@@ -310,7 +335,7 @@ class VideoPlayer extends React.Component {
       videoUrl, poster, muted, repeat, posterResizeMode,
       playInBackground, allowsExternalPlayback, ignoreSilentSwitch,
       playWhenInactive, resizeMode, controls, showBack = true,
-      enableSwitchScreen = true
+      enableSwitchScreen = true, statusBarTrans = false
     } = this.props
     const {
       isPaused, videoHeight, videoWidth, rateIndex,
@@ -320,7 +345,7 @@ class VideoPlayer extends React.Component {
 
     return (
       <>
-        <Header statusBar={statusBar} showStatusBar={showStatusBar} isFullScreen={isFullScreen} />
+        <Header statusBar={statusBar} trans={statusBarTrans} showStatusBar={showStatusBar} isFullScreen={isFullScreen} />
         <View
           style={{
             height: videoHeight,
@@ -334,28 +359,28 @@ class VideoPlayer extends React.Component {
             <Video
               ref={ref => this.video = ref}
               source={{ uri: videoUrl }}
-              poster={poster || null} // 封面
+              poster={poster} // 封面
               paused={isPaused} // 暂停
-              muted={muted || false} // 控制音频是否静音
-              repeat={repeat || false} // 确定在到达结尾时是否重复播放视频。
+              muted={muted} // 控制音频是否静音
+              repeat={repeat} // 确定在到达结尾时是否重复播放视频。
               rate={rate[rateIndex]}// 播放速率
-              playInBackground={playInBackground || false}
-              allowsExternalPlayback={allowsExternalPlayback || false}
-              ignoreSilentSwitch={ignoreSilentSwitch || 'ignore'}
-              posterResizeMode={posterResizeMode || 'cover'}// 封面大小
+              playInBackground={playInBackground}
+              allowsExternalPlayback={allowsExternalPlayback}
+              ignoreSilentSwitch={ignoreSilentSwitch}
+              posterResizeMode={posterResizeMode}// 封面大小
+              resizeMode={resizeMode} // 缩放模式
+              controls={controls}
+              playWhenInactive={playWhenInactive}// 确定当通知或控制中心在视频前面时，媒体是否应继续播放。
               onSeek={this._onSeek}
               onEnd={this._onEnd} // 视频播放结束时的回调函数
               onProgress={this._onProgress} // 视频播放过程中每个间隔进度单位调用的回调函数
-              // onBuffer={this._onBuffer} // 远程视频缓冲时的回调
-              onBuffer={(e) => { this._animatedonBuffer(e) }}
+              onBuffer={this._onBuffer} // 远程视频缓冲时的回调
+              // onBuffer={(e) => { this._animatedonBuffer(e) }}
               onLoadStart={this._onLoadStart}
               onLoad={this._onLoad} // 加载媒体并准备播放时调用的回调函数。
               onError={this._onError} // 播放失败后的回调
               onReadyForDisplay={this._onReadyForDisplay}
-              resizeMode={resizeMode || 'contain'} // 缩放模式
-              controls={controls || false}
-              playWhenInactive={playWhenInactive || true}// 确定当通知或控制中心在视频前面时，媒体是否应继续播放。
-              style={{ backgroundColor: 'blue', height: videoHeight, width: videoWidth }}
+              style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}
             />
           </TouchableOpacity>
           {
@@ -392,20 +417,33 @@ class VideoPlayer extends React.Component {
                 style={[styles.Control, styles.topControl, {
                   opacity: opacityControl,
                   height: isFullScreen ? 72 : 50,
-                  paddingTop: isFullScreen ? 22 : 0
+                  paddingTop: isFullScreen ? 22 : statusBarTrans ? statusBarHeight : 0,
+                  paddingHorizontal: 15
                 }]}
               >
                 <LinearGradient
                   colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0)']}
-                  style={[styles.shadow, { height: isFullScreen ? 72 : 50, width: videoWidth }]}
+                  style={[styles.shadow, { height: isFullScreen ? 72 : statusBarTrans ? (50 + statusBarHeight) : 50, width: videoWidth }]}
                 />
                 {
-                  showBack ? (
+                  (showBack && !isFullScreen) ? (
                     <TouchableOpacity
                       activeOpacity={1}
-                      style={[styles.backButton, {
-                        marginLeft: isFullScreen ? 30 : 0
-                      }]}
+                      style={styles.backButton}
+                      onPress={this._onBackButton}
+                    >
+                      <Image
+                        source={VideoImages.icon_back}
+                        style={{ width: 26, height: 26 }}
+                      />
+                    </TouchableOpacity>
+                  ) : null
+                }
+                {
+                  isFullScreen ? (
+                    <TouchableOpacity
+                      activeOpacity={1}
+                      style={styles.backButton}
                       onPress={this._onTapBackButton}
                     >
                       <Image
@@ -415,7 +453,11 @@ class VideoPlayer extends React.Component {
                     </TouchableOpacity>
                   ) : null
                 }
-                <Text style={styles.videoTitle} numberOfLines={1}>{videoTitle}</Text>
+                {
+                  isFullScreen ? (
+                    <Text style={styles.videoTitle} numberOfLines={1}>{videoTitle}</Text>
+                  ) : null
+                }
               </Animated.View>
             ) : null
           }
@@ -504,8 +546,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   playButton: {
-    width: 50,
-    height: 50
+    width: 60,
+    height: 60
   },
   videoTitle: {
     fontSize: 14,

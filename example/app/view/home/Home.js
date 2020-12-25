@@ -20,7 +20,7 @@ class Home extends Component {
 
     return (
       <View style={{ flex: 1, backgroundColor: 'red' }}>
-        <VideoPlayer videoUrl={videoUrl} videoTitle={videoTitle} autoPlay={autoPlay} poster={videoImage} />
+        <VideoPlayer videoUrl={videoUrl} statusBarTrans={true} videoTitle={videoTitle} autoPlay={autoPlay} poster={videoImage} />
         <ScrollView>
           <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
           <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
