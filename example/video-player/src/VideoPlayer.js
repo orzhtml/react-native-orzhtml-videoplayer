@@ -158,6 +158,8 @@ class VideoPlayer extends React.Component {
 
   _onLoad = (data) => {
     console.log('_onLoad data:', data)
+    const { onLoad } = this.props
+    onLoad && onLoad(data)
     this.setState({
       duration: data.duration
     })
@@ -165,10 +167,23 @@ class VideoPlayer extends React.Component {
 
   _onEnd = (e) => {
     console.log('_onEnd e:', e)
+    const { onEnd, repeat } = this.props
+    const { isPaused } = this.state
+    !repeat && this.setState({
+      isShowControl: true,
+      opacity: 1,
+      isPaused: true,
+      isEnd: true
+    })
+    if (!isPaused) {
+      onEnd && onEnd()
+    }
   }
 
   _onProgress = (data) => {
     // console.log('_onProgress data:', data)
+    const { onProgress } = this.props
+    onProgress && onProgress(data)
     const { isPaused } = this.state
     if (!isPaused) {
       this.setState({
@@ -182,16 +197,18 @@ class VideoPlayer extends React.Component {
   // }
   _animatedonBuffer = (event) => {
     const { onBuffer } = this.props
-    const { isPaused } = this.state
     console.log('_animatedonBuffer event:', event)
     onBuffer && onBuffer(event)
     this.setState({
-      showLoading: Platform.OS === 'android' ? (!!event.isBuffering) : (!isPaused && true)
+      showLoading: !!event.isBuffering
     })
   }
 
   _onError = (e) => {
     console.log('_onError e:', e)
+    const { onError } = this.props
+    onError && onError(e)
+    this.setState({ showLoading: false, isPaused: true })
   }
 
   _onSeek = (e) => {
@@ -203,10 +220,14 @@ class VideoPlayer extends React.Component {
 
   _onReadyForDisplay = (e) => {
     console.log('_onReadyForDisplay e:', e)
+    const { onReadyForDisplay } = this.props
+    onReadyForDisplay && onReadyForDisplay(e)
   }
 
   _onLoadStart = (e) => {
     console.log('_onLoadStart e:', e)
+    const { onLoadStart } = this.props
+    onLoadStart && onLoadStart(e)
   }
 
   _showControl = () => {
@@ -231,11 +252,21 @@ class VideoPlayer extends React.Component {
   _onTapPlayButton = () => {
     console.log('_onTapPlayButton')
     const { onPlay } = this.props
-    const { isPaused } = this.state
+    const { isPaused, isEnd } = this.state
     const _isPause_ = !isPaused
-    this.setState({
-      isPaused: _isPause_
-    })
+    if (isEnd) {
+      this.video.seek(0)
+      this.setState({
+        isPaused: false,
+        isEnd: false,
+        currentTime: 0
+      })
+    } else {
+      this.setState({
+        isPaused: _isPause_
+      })
+    }
+
     onPlay && onPlay(_isPause_)
   }
 
