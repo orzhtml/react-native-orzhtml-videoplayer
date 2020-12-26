@@ -8,8 +8,7 @@ import {
   StatusBar,
   Animated,
   Text,
-  ActivityIndicator,
-  Platform
+  ActivityIndicator
 } from 'react-native'
 import Slider from '@react-native-community/slider'
 import Orientation from 'react-native-orientation-locker'
@@ -220,14 +219,6 @@ class VideoPlayer extends React.Component {
       showLoading: !!e.isBuffering
     })
   }
-  // _animatedonBuffer = (event) => {
-  //   const { onBuffer } = this.props
-  //   console.log('_animatedonBuffer event:', event)
-  //   onBuffer && onBuffer(event)
-  //   this.setState({
-  //     showLoading: !!event.isBuffering
-  //   })
-  // }
 
   _onError = (e) => {
     console.log('_onError e:', e)
@@ -305,11 +296,13 @@ class VideoPlayer extends React.Component {
 
   _onSliderValueComplete = (currentTime) => {
     console.log('_onSliderValueComplete')
+    const { onPlay } = this.props
     this.video.seek(currentTime)
     this.setState({
       currentTime,
       isPaused: false
     })
+    onPlay && onPlay(false)
   }
 
   _onTapSwitchButton = () => {
@@ -327,6 +320,13 @@ class VideoPlayer extends React.Component {
     } else {
       this._smallScreen()
     }
+  }
+
+  onStop = () => {
+    this.setState({
+      isPaused: true,
+      isShowControl: false
+    })
   }
 
   render () {
