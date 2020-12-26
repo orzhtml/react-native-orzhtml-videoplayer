@@ -108,12 +108,17 @@ class VideoPlayer extends React.Component {
     posterResizeMode: 'cover',
     resizeMode: 'contain',
     controls: false,
-    playWhenInactive: true
+    playWhenInactive: true,
+    listMode: false, // 列表模式
+    showMinTitle: false // 是否显示小视频标题
   }
 
   constructor (props) {
     super(props)
     this.state = {
+      videoUrl: props.videoUrl,
+      poster: props.poster,
+      videoTitle: props.videoTitle,
       isPaused: !props.autoPlay,
       videoHeight: defaultVideoHeight,
       videoWidth: defaultVideoWidth,
@@ -126,10 +131,9 @@ class VideoPlayer extends React.Component {
       duration: 0, // 视频的时长
       currentTime: 0, // 视屏当前播放的时间
       playFromBeginning: false, // 视频是否需要从头开始播放
-      showStatusBar: props.showStatusBar
+      showStatusBar: props.showStatusBar,
+      initPlayStatus: false // 列表模式下视频初始化状态是否显示 video
     }
-    console.log('screenWidth:', screenWidth)
-    console.log('screenHeight:', screenHeight)
   }
 
   componentDidMount () {
@@ -273,12 +277,14 @@ class VideoPlayer extends React.Component {
     if (isEnd) {
       this.video.seek(0)
       this.setState({
+        initPlayStatus: true,
         isPaused: false,
         isEnd: false,
         currentTime: 0
       })
     } else {
       this.setState({
+        initPlayStatus: true,
         isPaused: _isPause_
       })
     }
@@ -287,7 +293,6 @@ class VideoPlayer extends React.Component {
   }
 
   _onSliderValueChange = (currentTime) => {
-    console.log('_onSliderValueChange')
     this.setState({
       currentTime,
       isPaused: true
@@ -297,10 +302,12 @@ class VideoPlayer extends React.Component {
   _onSliderValueComplete = (currentTime) => {
     console.log('_onSliderValueComplete')
     const { onPlay } = this.props
-    this.video.seek(currentTime)
     this.setState({
+      initPlayStatus: true,
       currentTime,
       isPaused: false
+    }, () => {
+      this.video.seek(currentTime)
     })
     onPlay && onPlay(false)
   }
@@ -314,6 +321,22 @@ class VideoPlayer extends React.Component {
     }
   }
 
+  updateVideo = (videoUrl, seekTime, videoTitle, videoCover) => {
+    const title = (videoTitle != null) ? videoTitle : this.state.videoTitle
+    let hasCover = true
+    if (videoCover == null || videoCover === '') {
+      hasCover = false
+    }
+    this.setState({
+      videoUrl: videoUrl,
+      videoTitle: title,
+      isPaused: false,
+      hasCover: hasCover,
+      isShowVideoCover: false
+    })
+    this.video.seek(seekTime)
+  }
+
   onFullScreen = (status) => {
     if (status) {
       this._fullScreen()
@@ -322,25 +345,33 @@ class VideoPlayer extends React.Component {
     }
   }
 
-  onStop = () => {
+  onStopPlay = () => {
     this.setState({
       isPaused: true,
       isShowControl: false
     })
   }
 
+  onStopListPlay = () => {
+    this.setState({
+      initPlayStatus: false,
+      isPaused: true,
+      isShowControl: false
+    })
+  }
+
   render () {
-    const { statusBar, videoTitle } = this.props
     const {
-      videoUrl, poster, muted, repeat, posterResizeMode,
+      muted, repeat, posterResizeMode, statusBar,
       playInBackground, allowsExternalPlayback, ignoreSilentSwitch,
-      playWhenInactive, resizeMode, controls, showBack = true,
-      enableSwitchScreen = true, statusBarTrans = false
+      playWhenInactive, resizeMode, controls, showBack,
+      enableSwitchScreen, statusBarTrans, listMode, showMinTitle
     } = this.props
     const {
+      videoUrl, poster, videoTitle,
       isPaused, videoHeight, videoWidth, rateIndex,
       isShowControl, opacityControl, duration, currentTime,
-      showStatusBar, isFullScreen, showLoading
+      showStatusBar, isFullScreen, showLoading, initPlayStatus
     } = this.state
 
     return (
@@ -356,32 +387,47 @@ class VideoPlayer extends React.Component {
             activeOpacity={1}
             onPress={this._showControl}
           >
-            <Video
-              ref={ref => this.video = ref}
-              source={{ uri: videoUrl }}
-              poster={poster} // 封面
-              paused={isPaused} // 暂停
-              muted={muted} // 控制音频是否静音
-              repeat={repeat} // 确定在到达结尾时是否重复播放视频。
-              rate={rate[rateIndex]}// 播放速率
-              playInBackground={playInBackground}
-              allowsExternalPlayback={allowsExternalPlayback}
-              ignoreSilentSwitch={ignoreSilentSwitch}
-              posterResizeMode={posterResizeMode}// 封面大小
-              resizeMode={resizeMode} // 缩放模式
-              controls={controls}
-              playWhenInactive={playWhenInactive}// 确定当通知或控制中心在视频前面时，媒体是否应继续播放。
-              onSeek={this._onSeek}
-              onEnd={this._onEnd} // 视频播放结束时的回调函数
-              onProgress={this._onProgress} // 视频播放过程中每个间隔进度单位调用的回调函数
-              onBuffer={this._onBuffer} // 远程视频缓冲时的回调
-              // onBuffer={(e) => { this._animatedonBuffer(e) }}
-              onLoadStart={this._onLoadStart}
-              onLoad={this._onLoad} // 加载媒体并准备播放时调用的回调函数。
-              onError={this._onError} // 播放失败后的回调
-              onReadyForDisplay={this._onReadyForDisplay}
-              style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}
-            />
+            {
+              (listMode && !initPlayStatus) ? (
+                <View style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}>
+                  {
+                    poster ? (
+                      <Image
+                        source={{ uri: poster }}
+                        style={{ height: videoHeight, width: videoWidth }} />
+                    ) : null
+                  }
+                </View>
+              ) : (
+                <Video
+                  ref={ref => this.video = ref}
+                  source={{ uri: videoUrl }}
+                  poster={poster} // 封面
+                  paused={isPaused} // 暂停
+                  muted={muted} // 控制音频是否静音
+                  repeat={repeat} // 确定在到达结尾时是否重复播放视频。
+                  rate={rate[rateIndex]}// 播放速率
+                  playInBackground={playInBackground}
+                  allowsExternalPlayback={allowsExternalPlayback}
+                  ignoreSilentSwitch={ignoreSilentSwitch}
+                  posterResizeMode={posterResizeMode}// 封面大小
+                  resizeMode={resizeMode} // 缩放模式
+                  controls={controls}
+                  playWhenInactive={playWhenInactive}// 确定当通知或控制中心在视频前面时，媒体是否应继续播放。
+                  onSeek={this._onSeek}
+                  onEnd={this._onEnd} // 视频播放结束时的回调函数
+                  onProgress={this._onProgress} // 视频播放过程中每个间隔进度单位调用的回调函数
+                  onBuffer={this._onBuffer} // 远程视频缓冲时的回调
+                  // onBuffer={(e) => { this._animatedonBuffer(e) }}
+                  onLoadStart={this._onLoadStart}
+                  onLoad={this._onLoad} // 加载媒体并准备播放时调用的回调函数。
+                  onError={this._onError} // 播放失败后的回调
+                  onReadyForDisplay={this._onReadyForDisplay}
+                  style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}
+                />
+              )
+            }
+
           </TouchableOpacity>
           {
             isShowControl ? (
@@ -451,6 +497,11 @@ class VideoPlayer extends React.Component {
                         style={{ width: 26, height: 26 }}
                       />
                     </TouchableOpacity>
+                  ) : null
+                }
+                {
+                  (!isFullScreen && showMinTitle) ? (
+                    <Text style={styles.videoTitle} numberOfLines={1}>{videoTitle}</Text>
                   ) : null
                 }
                 {

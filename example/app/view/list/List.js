@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { View, Text, FlatList } from 'react-native'
+import { View, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import OrzhtmlListView from 'react-native-orzhtml-listview'
 
@@ -102,7 +102,7 @@ class VideoCell extends PureComponent {
     const { isPaused } = this.props
     // 其他视频在播放的时候暂停上一个视频
     if (isPaused) {
-      this.VideoPlayer && this.VideoPlayer.onStop()
+      this.VideoPlayer && this.VideoPlayer.onStopListPlay()
     }
   }
 
@@ -117,7 +117,6 @@ class VideoCell extends PureComponent {
 
   render () {
     const { data, idx } = this.props
-    console.log('idx:', idx)
     return (
       <View style={{ marginTop: idx === 0 ? 0 : 10 }}>
         <VideoPlayer
@@ -127,7 +126,9 @@ class VideoCell extends PureComponent {
           poster={data.videoImage}
           showStatusBar={false}
           showBack={false}
+          listMode={true}
           onPlay={this._onPlay}
+          showMinTitle={true}
         />
         <View style={{
           justifyContent: 'center',
