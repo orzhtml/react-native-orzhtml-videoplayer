@@ -11,7 +11,7 @@ class Home extends Component {
       videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
       videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
       videoTitle: '这是可全屏的播放组件',
-      autoPlay: true
+      autoPlay: false
     }
   }
 

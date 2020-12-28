@@ -3,8 +3,7 @@ import { View, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import OrzhtmlListView from 'react-native-orzhtml-listview'
 
-import { VideoPlayer } from '../../../video-player'
-import { getStatusBarHeight } from '../../libs/StatusBarHeight'
+import { VideoPlayer, statusBarHeight } from '../../../video-player'
 
 class List extends PureComponent {
   constructor (props) {
@@ -81,7 +80,7 @@ class List extends PureComponent {
   render () {
     return (
       <View style={{ flex: 1, backgroundColor: '#f1f1f1' }}>
-        <View style={{ backgroundColor: '#fff', height: getStatusBarHeight() }} />
+        <View style={{ backgroundColor: '#fff', height: statusBarHeight }} />
         <OrzhtmlListView
           ref={ref => (this._flatList = ref)}
           style={{ flex: 1, backgroundColor: '#f1f1f1' }}

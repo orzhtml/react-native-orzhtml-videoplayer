@@ -10,7 +10,6 @@ import {
   Text,
   ActivityIndicator
 } from 'react-native'
-import Slider from '@react-native-community/slider'
 import Orientation from 'react-native-orientation-locker'
 import Video from 'react-native-video'
 import LinearGradient from 'react-native-linear-gradient'
@@ -23,19 +22,6 @@ export const screenWidth = Dimensions.get('screen').width
 export const screenHeight = Dimensions.get('screen').height
 export const defaultVideoHeight = screenWidth * 9 / 16
 export const defaultVideoWidth = screenWidth
-export function formatTime (second) {
-  let result = parseInt(second)
-  let h = Math.floor(result / 3600) < 10 ? '0' + Math.floor(result / 3600) : Math.floor(result / 3600)
-  let m = Math.floor((result / 60 % 60)) < 10 ? '0' + Math.floor((result / 60 % 60)) : Math.floor((result / 60 % 60))
-  let s = Math.floor((result % 60)) < 10 ? '0' + Math.floor((result % 60)) : Math.floor((result % 60))
-  if (Math.floor(result / 3600) === 0) {
-    result = `${m}:${s}`
-  } else {
-    result = `${h}:${m}:${s}`
-  }
-
-  return result
-}
 
 function Header ({ showStatusBar, trans, statusBar, isFullScreen }) {
   if (!showStatusBar) {
@@ -126,13 +112,14 @@ class VideoPlayer extends React.Component {
       opacityControl: new Animated.Value(1),
       onload: false, // 视频加载状态
       showLoading: false, // 是否显示正在加载
-      isShowControl: false,
+      showControl: false,
       isFullScreen: false, // 是否全屏
       duration: 0, // 视频的时长
       currentTime: 0, // 视屏当前播放的时间
       playFromBeginning: false, // 视频是否需要从头开始播放
       showStatusBar: props.showStatusBar,
-      initPlayStatus: false // 列表模式下视频初始化状态是否显示 video
+      initPlayStatus: false, // 列表模式下视频初始化状态是否显示 video
+      showPoster: !props.autoPlay // 显示海报
     }
   }
 
@@ -193,7 +180,7 @@ class VideoPlayer extends React.Component {
     const { onEnd, repeat } = this.props
     const { isPaused } = this.state
     !repeat && this.setState({
-      isShowControl: true,
+      showControl: true,
       opacity: 1,
       isPaused: true,
       isEnd: true
@@ -251,9 +238,9 @@ class VideoPlayer extends React.Component {
   }
 
   _showControl = () => {
-    const { isShowControl } = this.state
+    const { showControl } = this.state
     this.setState({
-      isShowControl: !isShowControl
+      showControl: !showControl
     })
   }
 
@@ -277,6 +264,7 @@ class VideoPlayer extends React.Component {
     if (isEnd) {
       this.video.seek(0)
       this.setState({
+        showPoster: false, // 正在播放不显示海报
         initPlayStatus: true,
         isPaused: false,
         isEnd: false,
@@ -284,6 +272,7 @@ class VideoPlayer extends React.Component {
       })
     } else {
       this.setState({
+        showPoster: false, // 正在播放不显示海报
         initPlayStatus: true,
         isPaused: _isPause_
       })
@@ -348,7 +337,7 @@ class VideoPlayer extends React.Component {
   onStopPlay = () => {
     this.setState({
       isPaused: true,
-      isShowControl: false
+      showControl: false
     })
   }
 
@@ -356,7 +345,7 @@ class VideoPlayer extends React.Component {
     this.setState({
       initPlayStatus: false,
       isPaused: true,
-      isShowControl: false
+      showControl: false
     })
   }
 
@@ -368,14 +357,14 @@ class VideoPlayer extends React.Component {
       enableSwitchScreen, statusBarTrans, listMode, showMinTitle
     } = this.props
     const {
-      videoUrl, poster, videoTitle,
+      videoUrl, poster, videoTitle, showPoster,
       isPaused, videoHeight, videoWidth, rateIndex,
-      isShowControl, opacityControl, duration, currentTime,
+      showControl, opacityControl, // duration, currentTime,
       showStatusBar, isFullScreen, showLoading, initPlayStatus
     } = this.state
 
     return (
-      <>
+      <View>
         <Header statusBar={statusBar} trans={statusBarTrans} showStatusBar={showStatusBar} isFullScreen={isFullScreen} />
         <View
           style={{
@@ -427,10 +416,25 @@ class VideoPlayer extends React.Component {
                 />
               )
             }
-
+            {
+              !listMode && (poster !== null && poster !== undefined && poster !== '') && showPoster ? (
+                <View style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'blue',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Image source={{ uri: poster }} style={{ height: videoHeight, width: videoWidth }} />
+                </View>
+              ) : null
+            }
           </TouchableOpacity>
           {
-            isShowControl ? (
+            showControl ? (
               <TouchableOpacity
                 activeOpacity={1}
                 onPress={this._showControl}
@@ -458,7 +462,7 @@ class VideoPlayer extends React.Component {
             ) : null
           }
           {
-            isShowControl ? (
+            showControl ? (
               <Animated.View
                 style={[styles.Control, styles.topControl, {
                   opacity: opacityControl,
@@ -513,7 +517,7 @@ class VideoPlayer extends React.Component {
             ) : null
           }
           {
-            isShowControl ? (
+            showControl ? (
               <Animated.View
                 style={[styles.Control, styles.bottomControl, {
                   opacity: opacityControl,
@@ -524,19 +528,23 @@ class VideoPlayer extends React.Component {
                   colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
                   style={[styles.shadow, { height: 50, width: videoWidth }]}
                 />
-                <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-                <Slider
-                  style={{ flex: 1 }}
-                  maximumTrackTintColor={'#999999'}// 滑块右侧轨道的颜色
-                  minimumTrackTintColor={'#00c06d'}// 滑块左侧轨道的颜色
-                  thumbImage={VideoImages.icon_control_slider}
-                  value={currentTime}
-                  minimumValue={0}
-                  maximumValue={Number(duration)}
-                  onSlidingComplete={this._onSliderValueComplete}
-                  onValueChange={this._onSliderValueChange}
-                />
-                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                {
+                //   <Speed
+                //   color={this.props.speedColor}
+                //   cachColor={this.props.cachColor}
+                //   dotColor={this.props.dotColor}
+                //   dotBorderColor={this.props.dotBorderColor}
+                //   allSpeedColor={this.props.allSpeedColor}
+                //   admRePlay={this.state.admRePlay}
+                //   nowTime={this.nowTime}
+                //   panHandlers={this._panSpeeDot.panHandlers}
+                //   // allTime={allTime}
+                //   ref={child => this.dotspeed = child}
+                //   playDotX={this.playDotX}
+                //   playBufferX={this.playBufferX}
+                //   ismoveDot={this.ismoveDot}
+                // />
+                }
                 {
                   enableSwitchScreen ? (
                     <TouchableOpacity
@@ -563,7 +571,7 @@ class VideoPlayer extends React.Component {
           }
           <Loading showLoading={showLoading} videoHeight={videoHeight} videoWidth={videoWidth} />
         </View>
-      </>
+      </View>
     )
   }
 }

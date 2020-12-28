@@ -20,7 +20,7 @@ const forFade = ({ current }) => ({
 function Router () {
   return (
     <NavigationContainer>
-      <RootStack.Navigator initialRouteName={'List'} screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator initialRouteName={'Home'} screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Home" component={Home}
           options={{
             cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
