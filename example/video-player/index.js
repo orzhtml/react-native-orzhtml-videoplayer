@@ -1,4 +1,8 @@
 export {
   default as VideoPlayer,
-  statusBarHeight
+  statusBarHeight,
+  screenWidth,
+  screenHeight,
+  defaultVideoHeight,
+  defaultVideoWidth
 } from './src/VideoPlayer'

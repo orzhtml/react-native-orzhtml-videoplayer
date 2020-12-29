@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import OrzhtmlListView from 'react-native-orzhtml-listview'
 
@@ -117,17 +117,19 @@ class VideoCell extends PureComponent {
   render () {
     const { data, idx } = this.props
     return (
-      <View style={{ marginTop: idx === 0 ? 0 : 10 }}>
+      <View style={{ marginTop: idx === 0 ? 0 : 10, paddingHorizontal: 15 }}>
         <VideoPlayer
           ref={ref => this.VideoPlayer = ref}
           videoUrl={data.videoUrl}
           videoTitle={data.videoTitle}
           poster={data.videoImage}
-          showStatusBar={false}
+          statusBar={() => null}
+          onPlay={this._onPlay}
           showBack={false}
           listMode={true}
-          onPlay={this._onPlay}
           showMinTitle={true}
+          videoMaxWidth={Dimensions.get('screen').width - 30}
+          paddingX={15}
         />
         <View style={{
           justifyContent: 'center',

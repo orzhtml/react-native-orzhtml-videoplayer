@@ -112,7 +112,7 @@ class Speed extends React.PureComponent {
           }} />
           {/* 缓存条 */}
           <Animated.View style={{
-            width: props.playBufferX || 0,
+            width: (props.playBufferX && props.playBufferX !== undefined && props.playBufferX !== null ? props.playBufferX : 0),
             height: 2,
             backgroundColor: '#fff',
             position: 'absolute',
@@ -122,7 +122,7 @@ class Speed extends React.PureComponent {
           {/* 进度条 */}
           <Animated.View
             style={{
-              width: dotStart ? dotWidth : (props.playDotX || 0),
+              width: dotStart ? dotWidth : (props.playDotX && props.playDotX !== undefined && props.playDotX !== null ? props.playDotX : 0),
               height: 2,
               backgroundColor: 'red',
               zIndex: 3

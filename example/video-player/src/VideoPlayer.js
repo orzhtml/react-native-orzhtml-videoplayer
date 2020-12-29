@@ -8,7 +8,6 @@ import {
   StatusBar,
   Animated,
   Text,
-  ActivityIndicator,
   PanResponder
 } from 'react-native'
 import Orientation from 'react-native-orientation-locker'
@@ -18,6 +17,8 @@ import LinearGradient from 'react-native-linear-gradient'
 import { getStatusBarHeight } from '../libs/StatusBarHeight'
 import VideoImages from '../libs/Images'
 import { formatTime } from '../libs/FormatTime'
+import Header from './Header'
+import Loading from './Loading'
 import Speed from './Speed'
 
 export const statusBarHeight = getStatusBarHeight()
@@ -26,68 +27,15 @@ export const screenHeight = Dimensions.get('screen').height
 export const defaultVideoHeight = screenWidth * 9 / 16
 export const defaultVideoWidth = screenWidth
 
-function Header ({ showStatusBar, trans, statusBar, isFullScreen }) {
-  if (!showStatusBar) {
-    return null
-  }
-
-  if (statusBar) {
-    return statusBar
-  }
-
-  let backgroundColor = trans ? 'transparent' : '#000'
-
-  return (
-    <View style={{
-      backgroundColor: backgroundColor,
-      height: isFullScreen ? 0 : trans ? 0 : statusBarHeight
-    }}>
-      <StatusBar translucent={true} backgroundColor={backgroundColor} barStyle={'light-content'} />
-    </View>
-  )
-}
-
-function Loading ({ showLoading, videoHeight, videoWidth }) {
-  if (!showLoading) {
-    return null
-  }
-
-  return (
-    <View
-      style={{
-        left: videoWidth / 2 - 45,
-        position: 'absolute',
-        top: videoHeight / 2 - 35,
-        justifyContent: 'center',
-        zIndex: 1
-      }}
-    >
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          paddingHorizontal: 10,
-          paddingVertical: 11,
-          borderRadius: 6
-        }}
-      >
-        <ActivityIndicator color={'#fff'} size={'large'} />
-        <Text style={{ color: '#fff' }}>正在缓冲...</Text>
-      </View>
-    </View>
-  )
-}
-
 const rate = [1, 1.25, 1.5, 1.75, 2]
 
 class VideoPlayer extends React.Component {
   static defaultProps = {
     autoPlay: false,
     showBack: true,
-    enableSwitchScreen: true,
-    statusBarTrans: false,
-    showStatusBar: true,
+    enableSwitchScreen: true, // 是否显示切换全屏按钮
+    statusBar: null, // 状态栏
+    statusBarTrans: false, // 是否沉侵式 状态栏
     poster: null,
     muted: false,
     repeat: false,
@@ -99,18 +47,28 @@ class VideoPlayer extends React.Component {
     controls: false,
     playWhenInactive: true,
     listMode: false, // 列表模式
-    showMinTitle: false // 是否显示小视频标题
+    showMinTitle: false, // 是否显示小视频标题
+    videoMaxWidth: 0, // 默认小屏视频最大宽度
+    paddingX: 0 // 边距的值
   }
 
   constructor (props) {
     super(props)
+
+    let videoWidth = screenWidth
+    let videoHeight = defaultVideoHeight
+    if (props.videoMaxWidth !== 0) {
+      videoWidth = props.videoMaxWidth
+      videoHeight = videoWidth * 9 / 16
+    }
+
     this.state = {
+      videoWidth,
+      videoHeight,
       videoUrl: props.videoUrl,
       poster: props.poster,
       videoTitle: props.videoTitle,
       isPaused: !props.autoPlay,
-      videoHeight: defaultVideoHeight,
-      videoWidth: defaultVideoWidth,
       rateIndex: 0,
       opacityControl: new Animated.Value(1),
       onload: false, // 视频加载状态
@@ -120,11 +78,10 @@ class VideoPlayer extends React.Component {
       duration: 0, // 视频的时长
       allTime: null,
       playFromBeginning: false, // 视频是否需要从头开始播放
-      showStatusBar: props.showStatusBar,
       initPlayStatus: false, // 列表模式下视频初始化状态是否显示 video
       showPoster: !props.autoPlay // 显示海报
     }
-
+    this.isSuspended = !props.autoPlay // 是否处于暂停状态
     this.nowTime = '00:00'
     this.nowCurrentTime = 0 // 当前播放秒数
     this.nowBufferX = 0 // 当前缓存秒速
@@ -132,8 +89,9 @@ class VideoPlayer extends React.Component {
     this.bufferX = new Animated.Value(0)
     // 进度条长度
     this.progressBarLength = {
-      width: defaultVideoWidth - 216
+      width: videoWidth - 200
     }
+    this.paddingX = props.paddingX
     // 左右拖动进度条
     this._panSpeeDot = PanResponder.create({
       // 要求成为响应者：
@@ -150,7 +108,7 @@ class VideoPlayer extends React.Component {
         this.touchX = evt.nativeEvent.locationX
         this.dotSpeed.setDotStart(true)
         // console.log('this.touchX:', evt.nativeEvent, this.touchX)
-        this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x)
+        this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - (this.progressBarLength.x + this.paddingX))
       },
       onPanResponderMove: (evt, gestureState) => {
         // 最近一次的移动距离为gestureState.move{X,Y}
@@ -159,15 +117,15 @@ class VideoPlayer extends React.Component {
 
         // console.log('touchX:', this.touchX)
         // console.log('evt.nativeEvent.pageX:', evt.nativeEvent)
-        this.realMarginLeft = gestureState.moveX - this.progressBarLength.x
+        this.realMarginLeft = gestureState.moveX - (this.progressBarLength.x + this.paddingX)
         if (this.realMarginLeft >= this.progressBarLength.width) {
           this.realMarginLeft = this.progressBarLength.width
         }
         if (this.realMarginLeft > 0) {
-          if ((evt.nativeEvent.pageX - this.touchX - this.progressBarLength.x) >= this.progressBarLength.width) {
+          if ((evt.nativeEvent.pageX - this.touchX - (this.progressBarLength.x + this.paddingX)) >= this.progressBarLength.width) {
             this.dotSpeed.setDotWidth(this.progressBarLength.width)
           } else {
-            this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x)
+            this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - (this.progressBarLength.x + this.paddingX))
           }
         }
         // 从成为响应者开始时的累计手势移动距离为gestureState.d{x,y}
@@ -178,9 +136,9 @@ class VideoPlayer extends React.Component {
         // this.activateAutoHide()// 手指离开后激活自动隐藏
         let speedB = Math.round((this.dotSpeed.state.dotWidth) / this.progressBarLength.width * 100) / 100
         if (speedB >= 1) {
-          this.video.seek(duration * speedB - 2)
+          this.video && this.video.seek(duration * speedB - 2)
         } else {
-          this.video.seek(duration * speedB)
+          this.video && this.video.seek(duration * speedB)
         }
         this.isMoveDot = false
       },
@@ -311,8 +269,10 @@ class VideoPlayer extends React.Component {
 
   _onPlay = () => {
     const { onPlay } = this.props
-    const { isPaused, isEnd } = this.state
+    const { duration, isPaused, isEnd } = this.state
     const _isPause_ = !isPaused
+    const ratio = duration / this.progressBarLength.width
+
     console.log('_onPlay isEnd:', isEnd, '_isPause_', _isPause_)
     if (isEnd) {
       this.video.seek(0)
@@ -347,6 +307,32 @@ class VideoPlayer extends React.Component {
         showPoster: false, // 正在播放不显示海报
         initPlayStatus: true,
         isPaused: _isPause_
+      }, () => {
+        if (this.isSuspended) {
+          // 处于暂停状态，还原播放进度
+          this.video.seek(this.nowCurrentTime)
+          this.nowTime = formatTime(this.nowCurrentTime)
+          Animated.timing(
+            // timing方法使动画值随时间变化
+            this.dotX, // 要变化的动画值
+            {
+              toValue: this.nowCurrentTime / ratio, // 最终的动画值
+              duration: 0,
+              useNativeDriver: false
+            }
+          ).start() // 开始执行动画
+
+          Animated.timing(
+            // timing方法使动画值随时间变化
+            this.bufferX, // 要变化的动画值
+            {
+              toValue: this.nowBufferX / ratio, // 最终的动画值
+              duration: 0,
+              useNativeDriver: false
+            }
+          ).start()
+          this.isSuspended = false
+        }
       })
     }
 
@@ -386,11 +372,16 @@ class VideoPlayer extends React.Component {
   }
 
   _setSamllScreen = () => {
-    this.props.navigation && this.props.navigation.setParams({ enableGestures: true })
+    const { navigation, videoMaxWidth } = this.props
+    navigation && navigation.setParams({ enableGestures: true })
     this.dotSpeed && this.dotSpeed.setDotStart(false)
+    let videoWidth = screenWidth
+    if (videoMaxWidth !== 0) {
+      videoWidth = videoMaxWidth
+    }
     this.setState({
-      videoWidth: screenWidth,
-      videoHeight: screenWidth * 9 / 16,
+      videoWidth,
+      videoHeight: videoWidth * 9 / 16,
       isFullScreen: false
     }, () => {
       StatusBar.setHidden(false)
@@ -404,7 +395,11 @@ class VideoPlayer extends React.Component {
   }
 
   _showControl = () => {
-    const { showControl } = this.state
+    const { initPlayStatus, showControl } = this.state
+    if (!initPlayStatus) {
+      // 视频没有初始化的时候，禁止显示控制栏
+      return
+    }
     this.setState({
       showControl: !showControl
     })
@@ -523,6 +518,7 @@ class VideoPlayer extends React.Component {
       showControl: false,
       showLoading: false
     })
+    this.isSuspended = true
   }
 
   render () {
@@ -533,16 +529,18 @@ class VideoPlayer extends React.Component {
       enableSwitchScreen, statusBarTrans, listMode, showMinTitle
     } = this.props
     const {
-      videoUrl, poster, videoTitle, showPoster,
-      isPaused, videoHeight, videoWidth, rateIndex,
-      showControl, opacityControl,
-      showStatusBar, isFullScreen, showLoading, initPlayStatus,
-      allTime
+      videoUrl, poster, videoTitle,
+      showPoster, isPaused, videoHeight,
+      videoWidth, rateIndex, showControl,
+      opacityControl, isFullScreen, showLoading,
+      initPlayStatus, allTime
     } = this.state
 
     return (
       <View>
-        <Header statusBar={statusBar} trans={statusBarTrans} showStatusBar={showStatusBar} isFullScreen={isFullScreen} />
+        {
+          statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />)
+        }
         <View
           style={{
             height: videoHeight,
