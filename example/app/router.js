@@ -1,12 +1,13 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import {
-  createStackNavigator
-  // TransitionPresets
+  createStackNavigator,
+  TransitionPresets
 } from '@react-navigation/stack'
 
-import Home from './view/home/Home'
-import List from './view/list/List'
+import Home from './view/home'
+import VideoList from './view/list'
+import VideoDetails from './view/details'
 
 const RootStack = createStackNavigator()
 
@@ -20,15 +21,21 @@ const forFade = ({ current }) => ({
 function Router () {
   return (
     <NavigationContainer>
-      <RootStack.Navigator initialRouteName={'List'} screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator initialRouteName={'Home'} screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Home" component={Home}
           options={{
             cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
           }}
         />
-        <RootStack.Screen name="List" component={List}
+        <RootStack.Screen name="VideoList" component={VideoList}
           options={{
-            cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
+            ...TransitionPresets.SlideFromRightIOS
+          }}
+        />
+        <RootStack.Screen name="VideoDetails" component={VideoDetails}
+          options={{
+            gestureEnabled: true,
+            ...TransitionPresets.SlideFromRightIOS
           }}
         />
       </RootStack.Navigator>

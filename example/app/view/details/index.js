@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from 'react-native'
 
 import { VideoPlayer } from '../../../video-player'
 
-class Home extends Component {
+class VideoDetails extends Component {
   constructor (props) {
     super(props)
 
@@ -11,7 +11,7 @@ class Home extends Component {
       videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
       videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
       videoTitle: '这是可全屏的播放组件',
-      autoPlay: false
+      autoPlay: true
     }
   }
 
@@ -46,4 +46,4 @@ class Home extends Component {
   }
 }
 
-export default Home
+export default VideoDetails

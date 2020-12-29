@@ -309,6 +309,50 @@ class VideoPlayer extends React.Component {
     onLoadStart && onLoadStart(e)
   }
 
+  _onPlay = () => {
+    const { onPlay } = this.props
+    const { isPaused, isEnd } = this.state
+    const _isPause_ = !isPaused
+    console.log('_onPlay isEnd:', isEnd, '_isPause_', _isPause_)
+    if (isEnd) {
+      this.video.seek(0)
+      this.nowTime = '00:00'
+      Animated.timing(
+        // timing方法使动画值随时间变化
+        this.dotX, // 要变化的动画值
+        {
+          toValue: 0, // 最终的动画值
+          duration: 0,
+          useNativeDriver: false
+        }
+      ).start() // 开始执行动画
+
+      Animated.timing(
+        // timing方法使动画值随时间变化
+        this.bufferX, // 要变化的动画值
+        {
+          toValue: 0, // 最终的动画值
+          duration: 0,
+          useNativeDriver: false
+        }
+      ).start()
+      this.setState({
+        showPoster: false, // 正在播放不显示海报
+        initPlayStatus: true,
+        isPaused: false,
+        isEnd: false
+      })
+    } else {
+      this.setState({
+        showPoster: false, // 正在播放不显示海报
+        initPlayStatus: true,
+        isPaused: _isPause_
+      })
+    }
+
+    onPlay && onPlay(_isPause_)
+  }
+
   changeSpeedTip = (e) => {
     // this.SpeedTipTimeRef && this.SpeedTipTim eRef.refs.gotimeSpeed.setNativeProps({ style: e })
   }
@@ -330,6 +374,7 @@ class VideoPlayer extends React.Component {
   }
 
   _setFullScreen = () => {
+    this.props.navigation && this.props.navigation.setParams({ enableGestures: false })
     this.dotSpeed && this.dotSpeed.setDotStart(false)
     this.setState({
       videoWidth: screenHeight,
@@ -341,6 +386,7 @@ class VideoPlayer extends React.Component {
   }
 
   _setSamllScreen = () => {
+    this.props.navigation && this.props.navigation.setParams({ enableGestures: true })
     this.dotSpeed && this.dotSpeed.setDotStart(false)
     this.setState({
       videoWidth: screenWidth,
@@ -374,52 +420,6 @@ class VideoPlayer extends React.Component {
     console.log('_onTapBackButton')
     // const { onTapBackButton } = this.props
     this._smallScreen()
-  }
-
-  _onTapPlayButton = () => {
-    console.log('_onTapPlayButton')
-    const { onPlay } = this.props
-    const { isPaused, isEnd } = this.state
-    const _isPause_ = !isPaused
-    console.log('_onTapPlayButton isEnd:', isEnd)
-    if (isEnd) {
-      this.video.seek(0)
-      this.nowTime = '00:00'
-      Animated.timing(
-        // timing方法使动画值随时间变化
-        this.dotX, // 要变化的动画值
-        {
-          toValue: 0, // 最终的动画值
-          duration: 0,
-          useNativeDriver: false
-        }
-      ).start() // 开始执行动画
-
-      Animated.timing(
-        // timing方法使动画值随时间变化
-        this.bufferX, // 要变化的动画值
-        {
-          toValue: 0, // 最终的动画值
-          duration: 0,
-          useNativeDriver: false
-        }
-      ).start()
-      this.setState({
-        showPoster: false, // 正在播放不显示海报
-        initPlayStatus: true,
-        isPaused: false,
-        isEnd: false
-      })
-    } else {
-      console.log('_onTapPlayButton:', _isPause_)
-      this.setState({
-        showPoster: false, // 正在播放不显示海报
-        initPlayStatus: true,
-        isPaused: _isPause_
-      })
-    }
-
-    onPlay && onPlay(_isPause_)
   }
 
   _onTapSwitchButton = () => {
@@ -480,6 +480,8 @@ class VideoPlayer extends React.Component {
     })
   }
 
+  /* 以下为 外部接口 */
+  // 更新视频数据
   updateVideo = (videoUrl, seekTime, videoTitle, videoCover) => {
     const title = (videoTitle != null) ? videoTitle : this.state.videoTitle
     let hasCover = true
@@ -496,6 +498,7 @@ class VideoPlayer extends React.Component {
     this.video.seek(seekTime)
   }
 
+  // 变更全屏方式
   onFullScreen = (status) => {
     if (status) {
       this._fullScreen()
@@ -504,6 +507,7 @@ class VideoPlayer extends React.Component {
     }
   }
 
+  // 暂停视频
   onStopPlay = () => {
     this.setState({
       isPaused: true,
@@ -511,6 +515,7 @@ class VideoPlayer extends React.Component {
     })
   }
 
+  // 其他视频在播放的时候暂停上一个视频
   onStopListPlay = () => {
     this.setState({
       initPlayStatus: false,
@@ -549,13 +554,11 @@ class VideoPlayer extends React.Component {
             onPress={this._showControl}
           >
             {
-              (listMode && !initPlayStatus) ? (
+              (listMode && !initPlayStatus) || (!listMode && (poster !== null && poster !== undefined && poster !== '') && showPoster) ? (
                 <View style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}>
                   {
                     poster ? (
-                      <Image
-                        source={{ uri: poster }}
-                        style={{ height: videoHeight, width: videoWidth }} />
+                      <Image source={{ uri: poster }} style={{ height: videoHeight, width: videoWidth }} />
                     ) : null
                   }
                 </View>
@@ -587,22 +590,6 @@ class VideoPlayer extends React.Component {
                 />
               )
             }
-            {
-              !listMode && (poster !== null && poster !== undefined && poster !== '') && showPoster ? (
-                <View style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  backgroundColor: '#000',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Image source={{ uri: poster }} style={{ height: videoHeight, width: videoWidth }} />
-                </View>
-              ) : null
-            }
           </TouchableOpacity>
           {
             (isPaused && !showControl && !showLoading) || (showControl && !showLoading) ? (
@@ -622,7 +609,7 @@ class VideoPlayer extends React.Component {
                 <TouchableOpacity
                   activeOpacity={1}
                   style={styles.playButton}
-                  onPress={this._onTapPlayButton}
+                  onPress={this._onPlay}
                 >
                   <Image
                     style={styles.playButton}
