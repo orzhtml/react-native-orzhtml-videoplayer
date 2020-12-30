@@ -5,12 +5,7 @@ import {
 } from 'react-native'
 import { getStatusBarHeight } from '../libs/StatusBarHeight'
 
-function Header ({ trans, statusBar, isFullScreen }) {
-  if (statusBar) {
-    // statusBar={()=>null} //不使用默认状态栏 跟当前app保持一致
-    return statusBar
-  }
-
+function Header ({ trans, isFullScreen }) {
   let backgroundColor = trans ? 'transparent' : '#000'
 
   return (

@@ -27,29 +27,29 @@ export const screenHeight = Dimensions.get('screen').height
 export const defaultVideoHeight = screenWidth * 9 / 16
 export const defaultVideoWidth = screenWidth
 
-const rate = [1, 1.25, 1.5, 1.75, 2]
-
 class VideoPlayer extends React.Component {
   static defaultProps = {
-    autoPlay: false,
+    autoPlay: false, // 控制播放器是否自动播放
     showBack: true,
     enableSwitchScreen: true, // 是否显示切换全屏按钮
     statusBar: null, // 状态栏
     statusBarTrans: false, // 是否沉侵式 状态栏
-    poster: null,
-    muted: false,
-    repeat: false,
-    playInBackground: false,
-    allowsExternalPlayback: false,
-    ignoreSilentSwitch: 'ignore',
-    posterResizeMode: 'cover',
-    resizeMode: 'contain',
+    poster: null, // 加载视频时要显示的图像
+    muted: false, // 控制音频是否静音
+    repeat: false, // 确定在到达结尾时是否重复播放视频
+    playInBackground: false, // 确定应用程序在后台时是否应继续播放媒体。 这允许客户继续收听音频。
+    allowsExternalPlayback: false, // 指示播放器是否允许切换到AirPlay或HDMI等外部播放模式
+    ignoreSilentSwitch: 'ignore', // 控制iOS静默开关行为
+    playFromBeginning: false, // 视频是否需要从头开始播放
+    posterResizeMode: 'cover', // 确定当帧与原始视频尺寸不匹配时如何调整海报图像的大小
+    resizeMode: 'contain', // 确定当帧与原始视频尺寸不匹配时如何调整视频大小
     controls: false,
-    playWhenInactive: true,
+    playWhenInactive: true, // 在通知或控制中心位于视频前面时是否应继续播放媒体
     listMode: false, // 列表模式
     showMinTitle: false, // 是否显示小视频标题
     videoMaxWidth: 0, // 默认小屏视频最大宽度
-    paddingX: 0 // 边距的值
+    paddingX: 0, // 边距的值
+    rate: [1, 1.25, 1.5, 1.75, 2] // 视频播放的速率
   }
 
   constructor (props) {
@@ -77,11 +77,10 @@ class VideoPlayer extends React.Component {
       isFullScreen: false, // 是否全屏
       duration: 0, // 视频的时长
       allTime: null,
-      playFromBeginning: false, // 视频是否需要从头开始播放
-      initPlayStatus: false, // 列表模式下视频初始化状态是否显示 video
-      showPoster: !props.autoPlay // 显示海报
+      initPlayStatus: props.autoPlay, // 视频初始化状态是否显示 video
+      showPoster: !props.autoPlay, // 显示海报
+      isSuspended: false // 是否处于暂停状态
     }
-    this.isSuspended = !props.autoPlay // 是否处于暂停状态
     this.nowTime = '00:00'
     this.nowCurrentTime = 0 // 当前播放秒数
     this.nowBufferX = 0 // 当前缓存秒速
@@ -269,7 +268,7 @@ class VideoPlayer extends React.Component {
 
   _onPlay = () => {
     const { onPlay } = this.props
-    const { duration, isPaused, isEnd } = this.state
+    const { duration, isPaused, isEnd, isSuspended } = this.state
     const _isPause_ = !isPaused
     const ratio = duration / this.progressBarLength.width
 
@@ -308,7 +307,7 @@ class VideoPlayer extends React.Component {
         initPlayStatus: true,
         isPaused: _isPause_
       }, () => {
-        if (this.isSuspended) {
+        if (isSuspended) {
           // 处于暂停状态，还原播放进度
           this.video.seek(this.nowCurrentTime)
           this.nowTime = formatTime(this.nowCurrentTime)
@@ -331,7 +330,10 @@ class VideoPlayer extends React.Component {
               useNativeDriver: false
             }
           ).start()
-          this.isSuspended = false
+
+          this.setState({
+            isSuspended: false
+          })
         }
       })
     }
@@ -339,7 +341,7 @@ class VideoPlayer extends React.Component {
     onPlay && onPlay(_isPause_)
   }
 
-  changeSpeedTip = (e) => {
+  _changeSpeedTip = (e) => {
     // this.SpeedTipTimeRef && this.SpeedTipTim eRef.refs.gotimeSpeed.setNativeProps({ style: e })
   }
 
@@ -516,17 +518,19 @@ class VideoPlayer extends React.Component {
       initPlayStatus: false,
       isPaused: true,
       showControl: false,
-      showLoading: false
+      showLoading: false,
+      isSuspended: true
     })
-    this.isSuspended = true
   }
 
   render () {
     const {
-      muted, repeat, posterResizeMode, statusBar,
-      playInBackground, allowsExternalPlayback, ignoreSilentSwitch,
-      playWhenInactive, resizeMode, controls, showBack,
-      enableSwitchScreen, statusBarTrans, listMode, showMinTitle
+      muted, repeat, posterResizeMode,
+      statusBar, playInBackground, allowsExternalPlayback,
+      ignoreSilentSwitch, playWhenInactive, resizeMode,
+      controls, showBack, enableSwitchScreen,
+      statusBarTrans, listMode, showMinTitle,
+      rate
     } = this.props
     const {
       videoUrl, poster, videoTitle,
@@ -538,9 +542,7 @@ class VideoPlayer extends React.Component {
 
     return (
       <View>
-        {
-          statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />)
-        }
+        { statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />) }
         <View
           style={{
             height: videoHeight,
@@ -554,11 +556,7 @@ class VideoPlayer extends React.Component {
             {
               (listMode && !initPlayStatus) || (!listMode && (poster !== null && poster !== undefined && poster !== '') && showPoster) ? (
                 <View style={{ backgroundColor: '#000', height: videoHeight, width: videoWidth }}>
-                  {
-                    poster ? (
-                      <Image source={{ uri: poster }} style={{ height: videoHeight, width: videoWidth }} />
-                    ) : null
-                  }
+                  <Image source={{ uri: poster }} style={{ height: videoHeight, width: videoWidth }} />
                 </View>
               ) : (
                 <Video
@@ -594,16 +592,7 @@ class VideoPlayer extends React.Component {
               <TouchableOpacity
                 activeOpacity={1}
                 onPress={this._showControl}
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  backgroundColor: 'transparent',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                style={styles.controlPlayBtn}>
                 <TouchableOpacity
                   activeOpacity={1}
                   style={styles.playButton}
@@ -620,16 +609,18 @@ class VideoPlayer extends React.Component {
           {
             showControl ? (
               <Animated.View
-                style={[styles.Control, styles.topControl, {
+                style={[styles.control, styles.topControl, {
                   opacity: opacityControl,
                   height: isFullScreen ? 72 : 50,
-                  paddingTop: isFullScreen ? 22 : statusBarTrans ? statusBarHeight : 0,
-                  paddingHorizontal: 15
+                  paddingTop: isFullScreen ? 22 : statusBarTrans ? statusBarHeight : 0
                 }]}
               >
                 <LinearGradient
                   colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0)']}
-                  style={[styles.shadow, { height: isFullScreen ? 72 : statusBarTrans ? (50 + statusBarHeight) : 50, width: videoWidth }]}
+                  style={[styles.shadow, {
+                    height: isFullScreen ? 72 : statusBarTrans ? (50 + statusBarHeight) : 50,
+                    width: videoWidth
+                  }]}
                 />
                 {
                   (showBack && !isFullScreen) ? (
@@ -675,9 +666,8 @@ class VideoPlayer extends React.Component {
           {
             showControl ? (
               <Animated.View
-                style={[styles.Control, styles.bottomControl, {
+                style={[styles.control, styles.bottomControl, {
                   opacity: opacityControl,
-                  zIndex: 99999,
                   width: videoWidth,
                   height: isFullScreen ? 75 : 50,
                   alignItems: isFullScreen ? 'flex-start' : 'center'
@@ -717,7 +707,7 @@ class VideoPlayer extends React.Component {
                       }}
                     >
                       <Image
-                        style={styles.control_switch_btn}
+                        style={styles.controlSwitchBtn}
                         source={!isFullScreen
                           ? VideoImages.icon_control_shrink_screen
                           : VideoImages.icon_control_full_screen}
@@ -742,7 +732,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0
   },
-  Control: {
+  control: {
     alignItems: 'center',
     flexDirection: 'row',
     position: 'absolute',
@@ -750,11 +740,12 @@ const styles = StyleSheet.create({
     right: 0
   },
   topControl: {
-    top: 0
+    top: 0,
+    paddingHorizontal: 15
   },
   bottomControl: {
-    height: 50,
-    bottom: 0
+    bottom: 0,
+    zIndex: 99999
   },
   backButton: {
     flexDirection: 'row',
@@ -773,17 +764,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 10
   },
-  control_play_btn: {
-    width: 24,
-    height: 24
+  controlPlayBtn: {
+    position: 'absolute',
+    bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  timeText: {
-    fontSize: 13,
-    color: 'white',
-    marginLeft: 10,
-    marginRight: 10
-  },
-  control_switch_btn: {
+  controlSwitchBtn: {
     width: 25,
     height: 25
   }
