@@ -11,14 +11,14 @@ class VideoDetails extends Component {
       videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
       videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
       videoTitle: '这是可全屏的播放组件',
-      autoPlay: true
+      autoPlay: false
     }
   }
 
   render () {
-    const { navigation } = this.props
+    const { navigation, route } = this.props
     const { videoUrl, videoImage, videoTitle, autoPlay } = this.state
-
+    console.log('route:', route.params)
     return (
       <View style={{ flex: 1, backgroundColor: 'red' }}>
         <VideoPlayer
@@ -30,6 +30,8 @@ class VideoDetails extends Component {
           onBackButton={() => {
             navigation.goBack()
           }}
+          navigation={navigation}
+        // isFullScreen={true}
         />
         <ScrollView>
           <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>

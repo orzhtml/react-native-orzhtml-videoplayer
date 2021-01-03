@@ -21,21 +21,33 @@ const forFade = ({ current }) => ({
 function Router () {
   return (
     <NavigationContainer>
-      <RootStack.Navigator initialRouteName={'Home'} screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator
+        initialRouteName={'Home'}
+        screenOptions={{
+          headerShown: false
+        }}
+      >
         <RootStack.Screen name="Home" component={Home}
           options={{
             cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
           }}
         />
         <RootStack.Screen name="VideoList" component={VideoList}
-          options={{
-            ...TransitionPresets.SlideFromRightIOS
+          options={({ route }) => {
+            const { params } = route
+            return {
+              gestureEnabled: params && params.enableGestures,
+              ...TransitionPresets.SlideFromRightIOS
+            }
           }}
         />
         <RootStack.Screen name="VideoDetails" component={VideoDetails}
-          options={{
-            gestureEnabled: true,
-            ...TransitionPresets.SlideFromRightIOS
+          options={({ route }) => {
+            const { params } = route
+            return {
+              gestureEnabled: params && params.enableGestures,
+              ...TransitionPresets.SlideFromRightIOS
+            }
           }}
         />
       </RootStack.Navigator>

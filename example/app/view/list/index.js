@@ -3,7 +3,7 @@ import { View, Text, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import OrzhtmlListView from 'react-native-orzhtml-listview'
 
-import { VideoPlayer, statusBarHeight } from '../../../video-player'
+import { VideoModal, statusBarHeight } from '../../../video-player'
 
 class List extends PureComponent {
   constructor (props) {
@@ -56,11 +56,13 @@ class List extends PureComponent {
   }
 
   _renderItemComponent = ({ item, index }) => {
+    const { navigation } = this.props
     return (
       <VideoCell
         idx={index}
         data={item}
         isPaused={item.isPaused}
+        navigation={navigation}
         stopOtherPlayer={this.stopOtherPlayer}
       />
     )
@@ -100,8 +102,9 @@ class VideoCell extends PureComponent {
   componentDidUpdate () {
     const { isPaused } = this.props
     // 其他视频在播放的时候暂停上一个视频
+    console.log('componentDidUpdate isPaused:', isPaused)
     if (isPaused) {
-      this.VideoPlayer && this.VideoPlayer.onStopListPlay()
+      this.VideoModal && this.VideoModal.onStopListPlay()
     }
   }
 
@@ -115,11 +118,11 @@ class VideoCell extends PureComponent {
   }
 
   render () {
-    const { data, idx } = this.props
+    const { navigation, data, idx } = this.props
     return (
       <View style={{ marginTop: idx === 0 ? 0 : 10, paddingHorizontal: 15 }}>
-        <VideoPlayer
-          ref={ref => this.VideoPlayer = ref}
+        <VideoModal
+          ref={ref => this.VideoModal = ref}
           videoUrl={data.videoUrl}
           videoTitle={data.videoTitle}
           poster={data.videoImage}
@@ -130,6 +133,7 @@ class VideoCell extends PureComponent {
           showMinTitle={true}
           videoMaxWidth={Dimensions.get('screen').width - 30}
           paddingX={15}
+          navigation={navigation}
         />
         <View style={{
           justifyContent: 'center',
