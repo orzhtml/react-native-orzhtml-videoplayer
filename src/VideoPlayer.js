@@ -144,7 +144,7 @@ class VideoPlayer extends React.Component {
       onPanResponderRelease: (evt, gestureState) => {
         const { duration } = this.state
         // this.activateAutoHide()// 手指离开后激活自动隐藏
-        let speedB = Math.round((this.dotSpeed.state.dotWidth) / this.progressBarLength.width * 100) / 100
+        const speedB = Math.round((this.dotSpeed.state.dotWidth) / this.progressBarLength.width * 100) / 100
         if (speedB >= 1) {
           this.video && this.video.seek(duration * speedB - 2)
         } else {
@@ -190,7 +190,6 @@ class VideoPlayer extends React.Component {
   _onLoad = (data) => {
     console.log('_onLoad data:', data)
     const { onLoad } = this.props
-    onLoad && onLoad(data)
 
     // 进度条动画
     this.playDotX = this.dotX.interpolate({
@@ -210,6 +209,8 @@ class VideoPlayer extends React.Component {
       allTime: formatTime(data.duration),
       onload: true,
       initPlayStatus: true
+    }, () => {
+      onLoad && onLoad(data)
     })
   }
 
@@ -375,26 +376,19 @@ class VideoPlayer extends React.Component {
 
   _fullScreen = () => {
     console.log('_fullScreen')
-    const { onChangeFullScreen, isModal } = this.props
     this._setFullScreen()
-    if (!isModal) {
-      Orientation.lockToLandscape()
-    }
-    onChangeFullScreen && onChangeFullScreen('full', this.nowCurrentTime, this.nowBufferX)
+    Orientation.lockToLandscape()
   }
 
   _smallScreen = () => {
     console.log('_smallScreen')
-    const { onChangeFullScreen, isModal } = this.props
     this._setSamllScreen()
-    if (!isModal) {
-      Orientation.lockToPortrait()
-    }
-    onChangeFullScreen && onChangeFullScreen('small', this.nowCurrentTime, this.nowBufferX)
+    Orientation.lockToPortrait()
   }
 
   _setFullScreen = () => {
-    const { listMode, navigation, isModal } = this.props
+    const { listMode, navigation, isModal, onChangeFullScreen } = this.props
+    const { isPaused } = this.state
     navigation && navigation.setParams({ enableGestures: false })
     this.dotSpeed && this.dotSpeed.setDotStart(false)
     if (listMode) {
@@ -405,6 +399,20 @@ class VideoPlayer extends React.Component {
           isFullScreen: true
         }, () => {
           StatusBar.setHidden(true)
+          onChangeFullScreen && onChangeFullScreen({
+            screen: 'full',
+            seekTime: this.nowCurrentTime,
+            buffer: this.nowBufferX,
+            paused: isPaused
+          })
+        })
+      } else {
+        StatusBar.setHidden(true)
+        onChangeFullScreen && onChangeFullScreen({
+          screen: 'full',
+          seekTime: this.nowCurrentTime,
+          buffer: this.nowBufferX,
+          paused: isPaused
         })
       }
     } else {
@@ -414,12 +422,20 @@ class VideoPlayer extends React.Component {
         isFullScreen: true
       }, () => {
         StatusBar.setHidden(true)
+        onChangeFullScreen && onChangeFullScreen({
+          screen: 'full',
+          seekTime: this.nowCurrentTime,
+          buffer: this.nowBufferX,
+          paused: isPaused
+        })
       })
     }
   }
 
   _setSamllScreen = () => {
-    const { navigation, videoMaxWidth, listMode, isModal } = this.props
+    const { navigation, videoMaxWidth, listMode, isModal, onChangeFullScreen } = this.props
+    const { isPaused } = this.state
+
     navigation && navigation.setParams({ enableGestures: true })
     this.dotSpeed && this.dotSpeed.setDotStart(false)
     let videoWidth = screenWidth
@@ -427,13 +443,29 @@ class VideoPlayer extends React.Component {
       videoWidth = videoMaxWidth
     }
     if (listMode) {
+      console.log('_setSamllScreen 1111111111111')
       if (isModal) {
         this.setState({
           videoWidth,
           videoHeight: videoWidth * 9 / 16,
           isFullScreen: false
         }, () => {
+          console.log('_setSamllScreen 222222222222')
           StatusBar.setHidden(false)
+          onChangeFullScreen && onChangeFullScreen({
+            screen: 'small',
+            seekTime: this.nowCurrentTime,
+            buffer: this.nowBufferX,
+            paused: isPaused
+          })
+        })
+      } else {
+        StatusBar.setHidden(false)
+        onChangeFullScreen && onChangeFullScreen({
+          screen: 'small',
+          seekTime: this.nowCurrentTime,
+          buffer: this.nowBufferX,
+          paused: isPaused
         })
       }
     } else {
@@ -443,6 +475,12 @@ class VideoPlayer extends React.Component {
         isFullScreen: false
       }, () => {
         StatusBar.setHidden(false)
+        onChangeFullScreen && onChangeFullScreen({
+          screen: 'small',
+          seekTime: this.nowCurrentTime,
+          buffer: this.nowBufferX,
+          paused: isPaused
+        })
       })
     }
   }
@@ -540,7 +578,7 @@ class VideoPlayer extends React.Component {
     const { duration } = this.state
     const ratio = duration / this.progressBarLength.width
     console.log('updateVideo:', duration)
-    let data = {}
+    const data = {}
     if (uri) {
       data.videoUrl = uri
     }
@@ -550,6 +588,7 @@ class VideoPlayer extends React.Component {
     if (paused !== undefined && paused !== null) {
       data.isPaused = paused
     }
+    console.log('data.isPaused:', data.isPaused)
     if (showPoster !== undefined && showPoster !== null) {
       data.showPoster = showPoster
     }
@@ -590,16 +629,17 @@ class VideoPlayer extends React.Component {
 
   // 暂停视频
   onStopPlay = () => {
-    console.log('onStopPlay')
+    console.log('onStopPlay 暂停视频')
     this.setState({
       isPaused: true,
-      showControl: false
+      showControl: false,
+      showLoading: false
     })
   }
 
   // 其他视频在播放的时候暂停上一个视频
   onStopListPlay = () => {
-    console.log('onStopListPlay')
+    console.log('onStopListPlay 其他视频在播放的时候暂停上一个视频')
     this.setState({
       initPlayStatus: false,
       isPaused: true,
@@ -633,6 +673,7 @@ class VideoPlayer extends React.Component {
       initPlayStatus, allTime
     } = this.state
 
+    console.log('render isPaused:', isPaused)
     return (
       <View>
         { statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />) }
@@ -824,30 +865,50 @@ class VideoModal extends React.Component {
     this.state = {
       fullScreen: false
     }
+    this.seekTime = 0
+    this.buffer = 0
+    this.paused = null
+  }
+
+  onStopPlay = () => {
+    console.log('VideoModal onStopPlay')
+    this.videoPlayer && this.videoPlayer.onStopPlay()
   }
 
   onStopListPlay = () => {
     this.videoPlayer && this.videoPlayer.onStopListPlay()
   }
 
-  onChangeFullScreen = (str, seekTime, buffer) => {
-    if (str === 'full') {
+  onChangeFullScreen = ({ screen, seekTime, buffer, paused }) => {
+    this.seekTime = seekTime
+    this.buffer = buffer
+    this.paused = paused
+    if (screen === 'full') {
       console.log('lockToPortrait:', 'full', seekTime, buffer)
+      this.videoPlayer && this.videoPlayer.onStopPlay()
       this.setState({
         fullScreen: true
-      }, () => {
-        this.videoPlayer && this.videoPlayer.onStopPlay()
-        this.videoModal && this.videoModal.updateVideo({ seekTime, buffer, paused: false })
       })
     } else {
       this.setState({
         fullScreen: false
       }, () => {
         console.log('lockToPortrait:', 'small', seekTime, buffer)
-        Orientation.lockToPortrait()
-        this.videoPlayer && this.videoPlayer.updateVideo({ seekTime, buffer, paused: false })
+        this.videoPlayer && this.videoPlayer.updateVideo({
+          seekTime: seekTime - 1,
+          buffer,
+          paused: paused
+        })
       })
     }
+  }
+
+  _onLoadVideoModal = () => {
+    this.videoModal && this.videoModal.updateVideo({
+      seekTime: this.seekTime - 1,
+      buffer: this.buffer,
+      paused: this.paused
+    })
   }
 
   render () {
@@ -875,8 +936,10 @@ class VideoModal extends React.Component {
             isFullScreen={true}
             listMode={false}
             showPoster={false}
+            autoPlay={false}
             // 协调局部、全屏播放进度
             onChangeFullScreen={this.onChangeFullScreen}
+            onLoad={this._onLoadVideoModal}
           />
         </Modal>
       </View>
