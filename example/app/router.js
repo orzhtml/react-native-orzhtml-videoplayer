@@ -29,7 +29,7 @@ function Router () {
       >
         <RootStack.Screen name="Home" component={Home}
           options={{
-            cardStyleInterpolator: forFade // CardStyleInterpolators.forFadeFromBottomAndroid
+            cardStyleInterpolator: forFade
           }}
         />
         <RootStack.Screen name="VideoList" component={VideoList}

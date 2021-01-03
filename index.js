@@ -1,8 +1,9 @@
 export {
-  default as VideoPlayer,
-  defaultVideoHeight,
-  isSystemIOS,
+  VideoPlayer,
+  VideoModal,
   statusBarHeight,
   screenWidth,
-  screenHeight
+  screenHeight,
+  defaultVideoHeight,
+  defaultVideoWidth
 } from './src/VideoPlayer'

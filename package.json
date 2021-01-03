@@ -1,6 +1,6 @@
 {
   "name": "react-native-orzhtml-videoplayer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "react-native video 视频控制组件",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "keywords": [
     "react-native",
     "video",
+    "videoModal",
     "controls",
     "player"
   ],
@@ -22,11 +23,8 @@
     "url": "https://github.com/orzhtml/react-native-orzhtml-videoplayer/issues"
   },
   "homepage": "https://github.com/orzhtml/react-native-orzhtml-videoplayer#readme",
-  "dependencies": {
-    "prop-types": "^15.7.2"
-  },
   "peerDependencies": {
-    "@react-native-community/slider": "*",
+    "react-native-linear-gradient": "*",
     "react": "*",
     "react-native": "*",
     "react-native-orientation-locker": "*",
@@ -35,7 +33,7 @@
   "devDependencies": {
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
-    "eslint": "^6.1.0",
+    "eslint": "^6.8.0",
     "eslint-config-standard": "^13.0.1",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^9.1.0",

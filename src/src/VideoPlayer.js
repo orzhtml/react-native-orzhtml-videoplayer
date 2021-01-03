@@ -375,17 +375,21 @@ class VideoPlayer extends React.Component {
 
   _fullScreen = () => {
     console.log('_fullScreen')
-    const { onChangeFullScreen } = this.props
+    const { onChangeFullScreen, isModal } = this.props
     this._setFullScreen()
-    Orientation.lockToLandscape()
+    if (!isModal) {
+      Orientation.lockToLandscape()
+    }
     onChangeFullScreen && onChangeFullScreen('full', this.nowCurrentTime, this.nowBufferX)
   }
 
   _smallScreen = () => {
     console.log('_smallScreen')
-    const { onChangeFullScreen } = this.props
+    const { onChangeFullScreen, isModal } = this.props
     this._setSamllScreen()
-    Orientation.lockToPortrait()
+    if (!isModal) {
+      Orientation.lockToPortrait()
+    }
     onChangeFullScreen && onChangeFullScreen('small', this.nowCurrentTime, this.nowBufferX)
   }
 
@@ -402,8 +406,6 @@ class VideoPlayer extends React.Component {
         }, () => {
           StatusBar.setHidden(true)
         })
-      } else {
-        StatusBar.setHidden(true)
       }
     } else {
       this.setState({
@@ -433,8 +435,6 @@ class VideoPlayer extends React.Component {
         }, () => {
           StatusBar.setHidden(false)
         })
-      } else {
-        StatusBar.setHidden(false)
       }
     } else {
       this.setState({
@@ -837,11 +837,7 @@ class VideoModal extends React.Component {
         fullScreen: true
       }, () => {
         this.videoPlayer && this.videoPlayer.onStopPlay()
-        this.videoModal && this.videoModal.updateVideo({
-          seekTime: seekTime - 1,
-          buffer,
-          paused: false
-        })
+        this.videoModal && this.videoModal.updateVideo({ seekTime, buffer, paused: false })
       })
     } else {
       this.setState({
@@ -849,11 +845,7 @@ class VideoModal extends React.Component {
       }, () => {
         console.log('lockToPortrait:', 'small', seekTime, buffer)
         Orientation.lockToPortrait()
-        this.videoPlayer && this.videoPlayer.updateVideo({
-          seekTime: seekTime - 1,
-          buffer,
-          paused: false
-        })
+        this.videoPlayer && this.videoPlayer.updateVideo({ seekTime, buffer, paused: false })
       })
     }
   }
