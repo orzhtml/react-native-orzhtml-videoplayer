@@ -924,7 +924,6 @@ class VideoModal extends React.Component {
         <Modal
           visible={fullScreen}
           transparent={true}
-          onRequestClose={this.onChangeFullScreen}
           supportedOrientations={['portrait', 'landscape']}
           hardwareAccelerated={true}
         >
