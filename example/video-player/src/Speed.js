@@ -5,7 +5,7 @@ import {
   Animated
 } from 'react-native'
 
-import { formatTime } from '../libs/FormatTime'
+import { formatTime } from '../libs/Utils'
 
 // 进度条
 class Speed extends React.PureComponent {
@@ -55,7 +55,7 @@ class Speed extends React.PureComponent {
   }
 
   onLayout = (e) => {
-    console.log('onlayout:', e.nativeEvent.layout)
+    console.log('onlayout:', JSON.stringify(e.nativeEvent.layout))
     const { setProgressBarLength } = this.props
     setProgressBarLength && setProgressBarLength(e.nativeEvent.layout)
     this.setState({
@@ -80,7 +80,7 @@ class Speed extends React.PureComponent {
           height: 50
         }}
         onLayout={(e) => {
-          console.log('onlayout bar e:', e.nativeEvent.layout)
+          console.log('onlayout bar e:', JSON.stringify(e.nativeEvent.layout))
         }}
       >
         <View style={{ width: 60, alignItems: 'center', justifyContent: 'center' }}>

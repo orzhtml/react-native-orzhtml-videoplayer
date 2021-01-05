@@ -2,14 +2,12 @@ import React from 'react'
 import {
   View,
   Image,
-  Dimensions,
   StyleSheet,
   TouchableOpacity,
   StatusBar,
   Animated,
   Text,
   PanResponder,
-  Modal,
   Platform,
   BackHandler
 } from 'react-native'
@@ -17,18 +15,11 @@ import Orientation from 'react-native-orientation-locker'
 import Video from 'react-native-video'
 import LinearGradient from 'react-native-linear-gradient'
 
-import { getStatusBarHeight } from '../libs/StatusBarHeight'
 import VideoImages from '../libs/Images'
-import { formatTime } from '../libs/FormatTime'
+import { statusBarHeight, screenWidth, screenHeight, defaultVideoHeight, formatTime } from '../libs/Utils'
 import Header from './Header'
 import Loading from './Loading'
 import Speed from './Speed'
-
-export const statusBarHeight = getStatusBarHeight()
-export const screenWidth = Dimensions.get('screen').width
-export const screenHeight = Dimensions.get('screen').height
-export const defaultVideoHeight = screenWidth * 9 / 16
-export const defaultVideoWidth = screenWidth
 
 class VideoPlayer extends React.Component {
   static defaultProps = {
@@ -524,8 +515,8 @@ class VideoPlayer extends React.Component {
   }
 
   _setProgressBarLength = (data) => {
+    console.log('_setProgressBarLength isFullScreen:', JSON.stringify(data))
     this.progressBarLength = data
-    console.log('_setProgressBarLength isFullScreen:', data, this.progressBarLength)
     // 更新播放进度
     this.playDotX = this.dotX.interpolate({
       inputRange: [0, data.width],
@@ -807,7 +798,7 @@ class VideoPlayer extends React.Component {
                   alignItems: isFullScreen ? 'flex-start' : 'center'
                 }]}
                 onLayout={(e) => {
-                  console.log('onlayout Control bar e:', e.nativeEvent.layout)
+                  console.log('onlayout Control bar e:', JSON.stringify(e.nativeEvent.layout))
                 }}
               >
                 <LinearGradient
@@ -837,7 +828,7 @@ class VideoPlayer extends React.Component {
                       }}
                       onPress={this._onTapSwitchButton}
                       onLayout={(e) => {
-                        console.log('switch screen:', e.nativeEvent.layout)
+                        console.log('switch screen:', JSON.stringify(e.nativeEvent.layout))
                       }}
                     >
                       <Image
@@ -854,93 +845,6 @@ class VideoPlayer extends React.Component {
           }
           <Loading showLoading={showLoading} videoHeight={videoHeight} videoWidth={videoWidth} />
         </View>
-      </View>
-    )
-  }
-}
-
-class VideoModal extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      fullScreen: false
-    }
-    this.seekTime = 0
-    this.buffer = 0
-    this.paused = null
-  }
-
-  onStopPlay = () => {
-    console.log('VideoModal onStopPlay')
-    this.videoPlayer && this.videoPlayer.onStopPlay()
-  }
-
-  onStopListPlay = () => {
-    this.videoPlayer && this.videoPlayer.onStopListPlay()
-  }
-
-  onChangeFullScreen = ({ screen, seekTime, buffer, paused }) => {
-    this.seekTime = seekTime
-    this.buffer = buffer
-    this.paused = paused
-    if (screen === 'full') {
-      console.log('lockToPortrait:', 'full', seekTime, buffer)
-      this.videoPlayer && this.videoPlayer.onStopPlay()
-      this.setState({
-        fullScreen: true
-      })
-    } else {
-      this.setState({
-        fullScreen: false
-      }, () => {
-        console.log('lockToPortrait:', 'small', seekTime, buffer)
-        this.videoPlayer && this.videoPlayer.updateVideo({
-          seekTime: seekTime - 1,
-          buffer,
-          paused: paused
-        })
-      })
-    }
-  }
-
-  _onLoadVideoModal = () => {
-    this.videoModal && this.videoModal.updateVideo({
-      seekTime: this.seekTime - 1,
-      buffer: this.buffer,
-      paused: this.paused
-    })
-  }
-
-  render () {
-    const { fullScreen } = this.state
-
-    return (
-      <View style={{}}>
-        <VideoPlayer
-          {...this.props}
-          ref={ref => this.videoPlayer = ref}
-          onChangeFullScreen={this.onChangeFullScreen}
-        />
-        <Modal
-          visible={fullScreen}
-          transparent={true}
-          supportedOrientations={['portrait', 'landscape']}
-          hardwareAccelerated={true}
-        >
-          <VideoPlayer
-            {...this.props}
-            ref={ref => this.videoModal = ref}
-            // 全屏组件的独有标记
-            isModal={true}
-            isFullScreen={true}
-            listMode={false}
-            showPoster={false}
-            autoPlay={false}
-            // 协调局部、全屏播放进度
-            onChangeFullScreen={this.onChangeFullScreen}
-            onLoad={this._onLoadVideoModal}
-          />
-        </Modal>
       </View>
     )
   }
@@ -1001,4 +905,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export { VideoPlayer, VideoModal }
+export default VideoPlayer
