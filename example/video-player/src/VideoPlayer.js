@@ -701,7 +701,6 @@ class VideoPlayer extends React.Component {
             showControl ? (
               <Animated.View
                 style={[styles.control, styles.bottomControl, {
-                  backgroundColor: 'blue',
                   opacity: opacityControl,
                   width: videoWidth,
                   height: isFullScreen ? 90 : 50,
