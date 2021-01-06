@@ -67,6 +67,8 @@ class VideoModal extends React.Component {
           {...this.props}
           ref={ref => this.videoPlayer = ref}
           onChangeFullScreen={this.onChangeFullScreen}
+          // 启用模态全屏模式
+          isModal={true}
         />
         <Modal
           visible={fullScreen}
@@ -77,10 +79,7 @@ class VideoModal extends React.Component {
           <VideoPlayer
             {...this.props}
             ref={ref => this.videoModal = ref}
-            // 全屏组件的独有标记
-            isModal={true}
             isFullScreen={true}
-            listMode={false}
             showPoster={false}
             autoPlay={false}
             // 协调局部、全屏播放进度

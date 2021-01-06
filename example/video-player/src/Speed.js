@@ -16,7 +16,7 @@ class Speed extends React.PureComponent {
       dotStart: false, // 是否按住了进度条上的点
       dotWidth: 0,
       progressBarLength: {
-        width: props.videoWidth - 228
+        width: props.videoWidth - 200
       }
     }
   }
@@ -76,19 +76,22 @@ class Speed extends React.PureComponent {
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'row',
-          paddingLeft: 15,
           height: 50
         }}
         onLayout={(e) => {
           console.log('onlayout bar e:', JSON.stringify(e.nativeEvent.layout))
         }}
       >
-        <View style={{ width: 60, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{ marginLeft: 15, width: 90, justifyContent: 'center' }}
+          onLayout={(e) => {
+            console.log('onlayout bar time e:', JSON.stringify(e.nativeEvent.layout))
+          }}
+        >
           <Text style={{ color: '#ffffff' }}>
-            {nowTime === '00:00' ? props.nowTime : nowTime}
+            {nowTime === '00:00' ? props.nowTime : nowTime}/{props.allTime === null ? '00:00' : props.allTime}
           </Text>
         </View>
-
         <View
           style={{
             flex: 1,
@@ -96,14 +99,16 @@ class Speed extends React.PureComponent {
             flexWrap: 'nowrap',
             alignItems: 'center',
             position: 'relative',
-            zIndex: 2
+            zIndex: 2,
+            marginLeft: 5,
+            marginRight: 15
           }}
           onLayout={this.onLayout}
         >
           {/* 总进度 */}
           <View style={{
             height: 2,
-            backgroundColor: '#aaa',
+            backgroundColor: 'rgba(137,137,137,0.8)',
             position: 'absolute',
             width: progressBarLength.width,
             zIndex: 1,
@@ -114,7 +119,7 @@ class Speed extends React.PureComponent {
           <Animated.View style={{
             width: (props.playBufferX && props.playBufferX !== undefined && props.playBufferX !== null ? props.playBufferX : 0),
             height: 2,
-            backgroundColor: '#fff',
+            backgroundColor: '#aaa',
             position: 'absolute',
             left: 0,
             zIndex: 2
@@ -124,7 +129,7 @@ class Speed extends React.PureComponent {
             style={{
               width: dotStart ? dotWidth : (props.playDotX && props.playDotX !== undefined && props.playDotX !== null ? props.playDotX : 0),
               height: 2,
-              backgroundColor: 'red',
+              backgroundColor: '#fff',
               zIndex: 3
             }}
           />
@@ -133,9 +138,9 @@ class Speed extends React.PureComponent {
             style={{
               alignItems: 'center',
               justifyContent: 'center',
-              left: -8,
-              width: 16,
-              height: 16,
+              left: -(props.dotWdt / 2),
+              width: props.dotWdt,
+              height: props.dotWdt,
               position: 'relative',
               zIndex: 4
             }}
@@ -145,15 +150,12 @@ class Speed extends React.PureComponent {
               ref={ref => this.dotSpeed = ref}
               style={{
                 backgroundColor: 'rgba(255,255,255,1)',
-                height: 16,
-                width: 16,
-                borderRadius: 16
+                height: 14,
+                width: 14,
+                borderRadius: 14
               }}
             />
           </View>
-        </View>
-        <View style={{ width: 60, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: '#ffffff' }}>{props.allTime === null ? '00:00' : props.allTime}</Text>
         </View>
       </View>
     )

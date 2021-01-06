@@ -46,6 +46,12 @@ class List extends PureComponent {
         videoImage: 'https://imagecloud.thepaper.cn/thepaper/image/105/640/250.jpg?x-oss-process=style/app750-280',
         videoTitle: '黎巴嫩商贸行业遭遇史上最严重危机，四成商店关门',
         isPaused: true
+      }, {
+        newId: '1117',
+        videoUrl: 'http://cloudvideo.thepaper.cn/video/9c5064f53cc649a181915c0d5d5eb7dd/hd/a4602300-6a38-4f02-900f-ef5cdc565715-359f2dfc-950c-1ba3-1211-e9ee0ec6b15c.mp4',
+        videoImage: 'https://imagecloud.thepaper.cn/thepaper/image/106/984/413.png?x-oss-process=style/app750-280',
+        videoTitle: '女子手卡绞肉机，正献血消防员飞奔出警',
+        isPaused: true
       }]
     }
   }

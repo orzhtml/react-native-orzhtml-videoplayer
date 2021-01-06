@@ -8,9 +8,6 @@ class VideoDetails extends Component {
     super(props)
 
     this.state = {
-      // videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
-      // videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
-      // videoTitle: '这是可全屏的播放组件',
       videoUrl: null,
       videoImage: null,
       videoTitle: null,
@@ -21,11 +18,11 @@ class VideoDetails extends Component {
   componentDidMount () {
     setTimeout(() => {
       this.setState({
-        videoUrl: 'http://cloudvideo.thepaper.cn/video/9c5064f53cc649a181915c0d5d5eb7dd/hd/a4602300-6a38-4f02-900f-ef5cdc565715-359f2dfc-950c-1ba3-1211-e9ee0ec6b15c.mp4',
-        videoImage: 'https://imagecloud.thepaper.cn/thepaper/image/106/984/413.png?x-oss-process=style/app750-280',
-        videoTitle: '女子手卡绞肉机，正献血消防员飞奔出警',
+        videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
+        videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
+        videoTitle: '这是可全屏的播放组件'
       })
-    }, 3000)
+    }, 1500)
   }
 
   render () {
@@ -41,7 +38,7 @@ class VideoDetails extends Component {
               videoUrl={videoUrl}
               statusBarTrans={true}
               videoTitle={videoTitle}
-              autoPlay={true}
+              autoPlay={autoPlay}
               poster={videoImage}
               onBackButton={() => {
                 navigation.goBack()
