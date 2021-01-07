@@ -212,6 +212,15 @@ class VideoPlayer extends React.Component {
     }
   }
 
+  componentDidUpdate () {
+    const { muted } = this.props
+    // 静音判断
+    console.log('componentDidUpdate muted:', muted)
+    if (muted !== this.state.muted) {
+      this._setMuted(muted)
+    }
+  }
+
   componentWillUnmount () {
     Orientation.lockToPortrait()
     if (Platform.OS === 'android') {
@@ -362,6 +371,13 @@ class VideoPlayer extends React.Component {
     }
 
     onPlay && onPlay(_isPause_)
+  }
+
+  _setMuted = (muted) => {
+    console.log('_setMuted muted:', muted)
+    this.setState({
+      muted: muted
+    })
   }
 
   animatedChange = (seekTime, buffer) => {
@@ -634,7 +650,7 @@ class VideoPlayer extends React.Component {
       ignoreSilentSwitch, playWhenInactive, resizeMode,
       controls, showBack, enableSwitchScreen,
       statusBarTrans, videoStyles, showMinTitle,
-      rate, dotWdt, showMuted
+      rate, dotWdt, showMuted, onMuted
     } = this.props
     const {
       videoUrl, poster, videoTitle,
@@ -809,8 +825,12 @@ class VideoPlayer extends React.Component {
                       paddingRight: 15
                     }}
                     onPress={() => {
+                      let _muted_ = !muted
+
+                      onMuted && onMuted(_muted_)
+
                       this.setState({
-                        muted: !muted
+                        muted: _muted_
                       })
                     }}
                   >
