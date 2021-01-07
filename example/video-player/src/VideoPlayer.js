@@ -75,7 +75,7 @@ class VideoPlayer extends React.Component {
       videoTitle: props.videoTitle,
       isPaused: !props.autoPlay,
       rateIndex: 0,
-      opacityControl: new Animated.Value(1),
+      opacityControl: new Animated.Value(0),
       onload: false, // 视频是否 onLoad 完成，
       showLoading: false, // 是否显示正在加载
       showControl: false,
@@ -448,6 +448,11 @@ class VideoPlayer extends React.Component {
       // 视频没有初始化的时候，禁止显示控制栏
       return
     }
+    if (!showControl) {
+      this.state.opacityControl.setValue(1)
+    } else {
+      this.state.opacityControl.setValue(0)
+    }
     this.setState({
       showControl: !showControl
     })
@@ -475,7 +480,7 @@ class VideoPlayer extends React.Component {
   }
 
   _setProgressBarLength = (data) => {
-    console.log('_setProgressBarLength isFullScreen:', JSON.stringify(data))
+    // console.log('_setProgressBarLength isFullScreen:', JSON.stringify(data))
     const { duration } = this.state
 
     this.progressBarLength = data
@@ -592,15 +597,15 @@ class VideoPlayer extends React.Component {
 
     // console.log('render isPaused:', isPaused, videoSize)
     return (
-      <View
-        onLayout={(e) => {
-          console.log('onlayout video bar e:', JSON.stringify(e.nativeEvent.layout))
-        }}
-      >
+      <View>
         { statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />) }
         <View style={videoSize}>
           <TouchableOpacity
             activeOpacity={1}
+            style={{
+              position: 'relative',
+              zIndex: 1
+            }}
             onPress={this._showControl}
           >
             {
@@ -660,138 +665,131 @@ class VideoPlayer extends React.Component {
               </TouchableOpacity>
             ) : null
           }
-          {
-            showControl ? (
-              <Animated.View
-                style={[styles.control, styles.topControl, {
-                  opacity: opacityControl,
-                  // height: isFullScreen ? 72 : statusBarTrans ? (30 + statusBarHeight) : 30,
-                  paddingTop: isFullScreen ? 30 : statusBarTrans ? statusBarHeight : 0
-                }]}
-              >
-                <LinearGradient
-                  colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0)']}
-                  style={[styles.shadow, {
-                    height: isFullScreen ? 72 : statusBarTrans ? (30 + statusBarHeight) : 30,
-                    width: videoWidth
-                  }]}
-                />
-                {
-                  (showBack && !isFullScreen) ? (
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      style={styles.backButton}
-                      onPress={this._onBackButton}
-                    >
-                      <Image
-                        source={VideoImages.icon_back}
-                        style={{ width: 26, height: 26 }}
-                      />
-                    </TouchableOpacity>
-                  ) : null
-                }
-                {
-                  isFullScreen ? (
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      style={styles.backButton}
-                      onPress={this._onTapBackButton}
-                    >
-                      <Image
-                        source={VideoImages.icon_back}
-                        style={{ width: 26, height: 26 }}
-                      />
-                    </TouchableOpacity>
-                  ) : null
-                }
-                {
-                  isFullScreen || (!isFullScreen && showMinTitle) ? (
-                    <Text style={[styles.videoTitle, { fontSize: isFullScreen ? 20 : 14 }]} numberOfLines={1}>{videoTitle}</Text>
-                  ) : null
-                }
-              </Animated.View>
-            ) : null
-          }
-          {
-            showControl ? (
-              <Animated.View
-                style={[styles.control, styles.bottomControl, {
-                  opacity: opacityControl,
-                  width: videoWidth,
-                  height: isFullScreen ? 90 : 50,
-                  alignItems: isFullScreen ? 'flex-start' : 'center'
-                }]}
-                onLayout={(e) => {
-                  console.log('onlayout Control bar e:', JSON.stringify(e.nativeEvent.layout))
-                }}
-              >
-                <LinearGradient
-                  colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
-                  style={[styles.shadow, { height: isFullScreen ? 90 : 50, width: videoWidth }]}
-                />
-                <Speed
-                  ref={ref => this.dotSpeed = ref}
-                  nowTime={this.nowTime}
-                  panHandlers={this._panSpeeDot.panHandlers}
-                  allTime={allTime}
-                  playDotX={this.playDotX}
-                  playBufferX={this.playBufferX}
-                  isMoveDot={this.isMoveDot}
-                  videoWidth={videoWidth}
-                  setProgressBarLength={this._setProgressBarLength}
-                  dotWdt={dotWdt}
-                />
-                {
-                  showMuted ? (
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: 50,
-                        paddingLeft: 10,
-                        paddingRight: 15
-                      }}
-                      onPress={() => {
-                        this.setState({
-                          muted: !muted
-                        })
-                      }}
-                    >
-                      <Image
-                        style={styles.controlSwitchBtn}
-                        source={muted ? VideoImages.muted_off : VideoImages.muted_on}
-                      />
-                    </TouchableOpacity>
-                  ) : null
-                }
-                {
-                  enableSwitchScreen ? (
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: 50,
-                        paddingRight: 15
-                      }}
-                      onPress={this._onTapSwitchButton}
-                      onLayout={(e) => {
-                        console.log('switch screen:', JSON.stringify(e.nativeEvent.layout))
-                      }}
-                    >
-                      <Image
-                        style={styles.controlSwitchBtn}
-                        source={!isFullScreen
-                          ? VideoImages.icon_control_shrink_screen
-                          : VideoImages.icon_control_full_screen}
-                      />
-                    </TouchableOpacity>
-                  ) : null
-                }
-              </Animated.View>
-            ) : null
-          }
+          <Animated.View
+            style={[styles.control, styles.topControl, {
+              opacity: opacityControl,
+              zIndex: showControl ? 1 : 0
+            }]}
+          >
+            <LinearGradient
+              colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0)']}
+              style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                paddingTop: isFullScreen ? 30 : statusBarTrans ? statusBarHeight : 15,
+                paddingBottom: 5,
+                width: videoWidth
+              }}
+            >
+              {
+                (showBack && !isFullScreen) ? (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={styles.backButton}
+                    onPress={this._onBackButton}
+                  >
+                    <Image
+                      source={VideoImages.icon_back}
+                      style={{ width: 26, height: 26 }}
+                    />
+                  </TouchableOpacity>
+                ) : null
+              }
+              {
+                isFullScreen ? (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={styles.backButton}
+                    onPress={this._onTapBackButton}
+                  >
+                    <Image
+                      source={VideoImages.icon_back}
+                      style={{ width: 26, height: 26 }}
+                    />
+                  </TouchableOpacity>
+                ) : null
+              }
+              {
+                isFullScreen || (!isFullScreen && showMinTitle) ? (
+                  <Text style={[styles.videoTitle, { fontSize: isFullScreen ? 20 : 14 }]} numberOfLines={1}>{videoTitle}</Text>
+                ) : null
+              }
+            </LinearGradient>
+          </Animated.View>
+          <Animated.View
+            style={[styles.control, styles.bottomControl, {
+              opacity: opacityControl,
+              width: videoWidth,
+              zIndex: showControl ? 1 : 0
+            }]}
+          >
+            <LinearGradient
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
+              style={{
+                flexDirection: 'row',
+                paddingBottom: isFullScreen ? 50 : 0,
+                width: videoWidth
+              }}
+            >
+              <Speed
+                ref={ref => this.dotSpeed = ref}
+                nowTime={this.nowTime}
+                panHandlers={this._panSpeeDot.panHandlers}
+                allTime={allTime}
+                playDotX={this.playDotX}
+                playBufferX={this.playBufferX}
+                isMoveDot={this.isMoveDot}
+                videoWidth={videoWidth}
+                setProgressBarLength={this._setProgressBarLength}
+                dotWdt={dotWdt}
+              />
+              {
+                showMuted ? (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: 50,
+                      paddingLeft: 10,
+                      paddingRight: 15
+                    }}
+                    onPress={() => {
+                      this.setState({
+                        muted: !muted
+                      })
+                    }}
+                  >
+                    <Image
+                      style={styles.controlSwitchBtn}
+                      source={muted ? VideoImages.muted_off : VideoImages.muted_on}
+                    />
+                  </TouchableOpacity>
+                ) : null
+              }
+              {
+                enableSwitchScreen ? (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: 50,
+                      paddingRight: 15
+                    }}
+                    onPress={this._onTapSwitchButton}
+                  >
+                    <Image
+                      style={styles.controlSwitchBtn}
+                      source={!isFullScreen
+                        ? VideoImages.icon_control_shrink_screen
+                        : VideoImages.icon_control_full_screen}
+                    />
+                  </TouchableOpacity>
+                ) : null
+              }
+            </LinearGradient>
+          </Animated.View>
           <Loading showLoading={showLoading} videoHeight={videoHeight} videoWidth={videoWidth} />
         </View>
       </View>
@@ -803,15 +801,8 @@ const styles = StyleSheet.create({
   videoStyles: {
     backgroundColor: '#000'
   },
-  shadow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0
-  },
   control: {
     alignItems: 'center',
-    flexDirection: 'row',
     position: 'absolute',
     left: 0,
     right: 0
@@ -821,8 +812,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15
   },
   bottomControl: {
-    bottom: 0,
-    zIndex: 99999
+    bottom: 0
   },
   backButton: {
     flexDirection: 'row',
@@ -849,7 +839,8 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'transparent',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    zIndex: 1
   },
   controlSwitchBtn: {
     width: 25,
