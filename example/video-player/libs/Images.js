@@ -27,7 +27,9 @@ const Images = {
   icon_volume_off: require('../image/icon_volume_off.png'),
   icon_volume_up: require('../image/icon_volume_up.png'),
   img_bottom_shadow: require('../image/img_bottom_shadow.png'),
-  img_top_shadow: require('../image/img_top_shadow.png')
+  img_top_shadow: require('../image/img_top_shadow.png'),
+  muted_on: require('../image/muted_on.png'),
+  muted_off: require('../image/muted_off.png')
 }
 
 export default Images

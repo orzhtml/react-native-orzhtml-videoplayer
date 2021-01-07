@@ -135,6 +135,8 @@ class VideoCell extends PureComponent {
           statusBar={() => null}
           onPlay={this._onPlay}
           showBack={false}
+          muted={true}
+          showMuted={true}
           showMinTitle={true}
           videoMaxWidth={Dimensions.get('screen').width - 30}
           paddingX={15}

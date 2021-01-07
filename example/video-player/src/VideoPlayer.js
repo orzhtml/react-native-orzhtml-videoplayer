@@ -45,6 +45,7 @@ class VideoPlayer extends React.Component {
     isModal: false,
     isFullScreen: false,
     showPoster: null,
+    showMuted: false, // 是否显示静音按钮
     dotWdt: 14 // 圆点直径
   }
 
@@ -573,7 +574,7 @@ class VideoPlayer extends React.Component {
       ignoreSilentSwitch, playWhenInactive, resizeMode,
       controls, showBack, enableSwitchScreen,
       statusBarTrans, videoStyles, showMinTitle,
-      rate, dotWdt
+      rate, dotWdt, showMuted
     } = this.props
     const {
       videoUrl, poster, videoTitle,
@@ -740,6 +741,30 @@ class VideoPlayer extends React.Component {
                   dotWdt={dotWdt}
                 />
                 {
+                  showMuted ? (
+                    <TouchableOpacity
+                      activeOpacity={1}
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 50,
+                        paddingLeft: 10,
+                        paddingRight: 15
+                      }}
+                      onPress={() => {
+                        this.setState({
+                          muted: !muted
+                        })
+                      }}
+                    >
+                      <Image
+                        style={styles.controlSwitchBtn}
+                        source={muted ? VideoImages.muted_off : VideoImages.muted_on}
+                      />
+                    </TouchableOpacity>
+                  ) : null
+                }
+                {
                   enableSwitchScreen ? (
                     <TouchableOpacity
                       activeOpacity={1}
@@ -747,7 +772,6 @@ class VideoPlayer extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         height: 50,
-                        paddingLeft: 5,
                         paddingRight: 15
                       }}
                       onPress={this._onTapSwitchButton}
