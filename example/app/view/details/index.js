@@ -26,11 +26,11 @@ class VideoDetails extends Component {
   }
 
   render () {
-    const { navigation, route } = this.props
+    const { navigation } = this.props
     const { videoUrl, videoImage, videoTitle, autoPlay } = this.state
-    console.log('route:', route.params)
+
     return (
-      <View style={{ flex: 1, backgroundColor: 'red' }}>
+      <View style={{ flex: 1 }}>
         {
           videoUrl ? (
             <VideoPlayer
@@ -45,6 +45,7 @@ class VideoDetails extends Component {
               }}
               navigation={navigation}
               // isFullScreen={true}
+              showMinTitle={true}
               muted={true}
               showMuted={true}
             />

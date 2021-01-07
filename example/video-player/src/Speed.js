@@ -78,18 +78,10 @@ class Speed extends React.PureComponent {
           flexDirection: 'row',
           height: 50
         }}
-        onLayout={(e) => {
-          console.log('onlayout bar e:', JSON.stringify(e.nativeEvent.layout))
-        }}
       >
-        <View
-          style={{ marginLeft: 15, width: 90, justifyContent: 'center' }}
-          onLayout={(e) => {
-            console.log('onlayout bar time e:', JSON.stringify(e.nativeEvent.layout))
-          }}
-        >
+        <View style={{ marginLeft: 15, width: 55, justifyContent: 'center', alignItems: 'flex-start' }} >
           <Text style={{ color: '#ffffff' }}>
-            {nowTime === '00:00' ? props.nowTime : nowTime}/{props.allTime === null ? '00:00' : props.allTime}
+            {nowTime === '00:00' ? props.nowTime : nowTime}
           </Text>
         </View>
         <View
@@ -99,8 +91,7 @@ class Speed extends React.PureComponent {
             flexWrap: 'nowrap',
             alignItems: 'center',
             position: 'relative',
-            zIndex: 2,
-            marginRight: 5
+            zIndex: 2
           }}
           onLayout={this.onLayout}
         >
@@ -156,6 +147,11 @@ class Speed extends React.PureComponent {
               }}
             />
           </Animated.View>
+        </View>
+        <View style={{ width: 55, justifyContent: 'center', alignItems: 'flex-end' }} >
+          <Text style={{ color: '#ffffff' }}>
+            {props.allTime === null ? '00:00' : props.allTime}
+          </Text>
         </View>
       </View>
     )

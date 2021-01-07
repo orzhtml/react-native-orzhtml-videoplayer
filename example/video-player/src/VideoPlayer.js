@@ -130,6 +130,7 @@ class VideoPlayer extends React.Component {
         // console.log('onPanResponderMove gestureState:', gestureState)
 
         this.realMarginLeft = gestureState.moveX - this.progressBarLength.x - this.paddingX
+        // console.log('this.realMarginLeft:', this.realMarginLeft)
         if (this.realMarginLeft >= this.progressBarLength.width) {
           this.realMarginLeft = this.progressBarLength.width
         }
@@ -137,7 +138,7 @@ class VideoPlayer extends React.Component {
           if ((evt.nativeEvent.pageX - this.touchX - this.progressBarLength.x - this.paddingX + (dotWdt / 2)) >= this.progressBarLength.width) {
             this.dotSpeed.setDotWidth(this.progressBarLength.width)
           } else {
-            this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x - this.paddingX - this.touchX + (dotWdt / 2))
+            this.dotSpeed.setDotWidth(Math.max(0, evt.nativeEvent.pageX - this.progressBarLength.x - this.paddingX - this.touchX + (dotWdt / 2)))
           }
         }
         // 从成为响应者开始时的累计手势移动距离为gestureState.d{x,y}
@@ -664,14 +665,14 @@ class VideoPlayer extends React.Component {
               <Animated.View
                 style={[styles.control, styles.topControl, {
                   opacity: opacityControl,
-                  height: isFullScreen ? 72 : 50,
-                  paddingTop: isFullScreen ? 22 : statusBarTrans ? statusBarHeight : 0
+                  // height: isFullScreen ? 72 : statusBarTrans ? (30 + statusBarHeight) : 30,
+                  paddingTop: isFullScreen ? 30 : statusBarTrans ? statusBarHeight : 0
                 }]}
               >
                 <LinearGradient
                   colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0)']}
                   style={[styles.shadow, {
-                    height: isFullScreen ? 72 : statusBarTrans ? (50 + statusBarHeight) : 50,
+                    height: isFullScreen ? 72 : statusBarTrans ? (30 + statusBarHeight) : 30,
                     width: videoWidth
                   }]}
                 />
@@ -705,7 +706,7 @@ class VideoPlayer extends React.Component {
                 }
                 {
                   isFullScreen || (!isFullScreen && showMinTitle) ? (
-                    <Text style={styles.videoTitle} numberOfLines={1}>{videoTitle}</Text>
+                    <Text style={[styles.videoTitle, { fontSize: isFullScreen ? 20 : 14 }]} numberOfLines={1}>{videoTitle}</Text>
                   ) : null
                 }
               </Animated.View>
