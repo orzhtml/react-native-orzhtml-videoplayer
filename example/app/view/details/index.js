@@ -36,7 +36,7 @@ class VideoDetails extends Component {
             <VideoPlayer
               ref={v => (this.VideoPlayer = v)}
               videoUrl={videoUrl}
-              statusBarTrans={true}
+              // statusBarTrans={true}
               videoTitle={videoTitle}
               autoPlay={autoPlay}
               poster={videoImage}

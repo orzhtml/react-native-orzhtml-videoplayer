@@ -99,6 +99,39 @@ class VideoPlayer extends React.Component {
       width: videoWidth - 200
     }
 
+    // 控件显示动画
+    this.AnimatedOp = Animated.timing(
+      // timing方法使动画值随时间变化
+      this.state.opacityControl, // 要变化的动画值
+      {
+        toValue: 1, // 最终的动画值
+        duration: 300,
+        useNativeDriver: false
+      }
+    )
+
+    // 控件隐藏动画
+    this.fastHide = Animated.timing(
+      // timing方法使动画值随时间变化
+      this.state.opacityControl, // 要变化的动画值
+      {
+        toValue: 0, // 最终的动画值
+        duration: 300,
+        useNativeDriver: false
+      }
+    )
+
+    // 直接隐藏
+    this.toofastHide = Animated.timing(
+      // timing方法使动画值随时间变化
+      this.state.opacityControl, // 要变化的动画值
+      {
+        toValue: 0, // 最终的动画值
+        duration: 0,
+        useNativeDriver: false
+      }
+    )
+
     // 左右拖动进度条
     this._panSpeeDot = PanResponder.create({
       // 要求成为响应者：
@@ -110,6 +143,7 @@ class VideoPlayer extends React.Component {
         const { dotWdt } = this.props
         const { onload } = this.state
         if (!onload) return// 需要权限 或者视频还不可以播放时停止不允许滑动进度条
+        clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
 
         this.isMoveDot = true
         // 开始手势操作。给用户一些视觉反馈，让他们知道发生了什么事情！
@@ -123,7 +157,6 @@ class VideoPlayer extends React.Component {
         const { navigation, dotWdt } = this.props
         const { onload } = this.state
         if (!onload) return// 需要权限 或者视频还不可以播放时停止不允许滑动进度条
-
         navigation && navigation.setParams({ enableGestures: false })
         // console.log('onPanResponderMove this.touchX:', this.touchX)
         // console.log('onPanResponderMove evt.nativeEvent:', evt.nativeEvent)
@@ -148,7 +181,7 @@ class VideoPlayer extends React.Component {
         const { navigation } = this.props
         const { duration } = this.state
         navigation && navigation.setParams({ enableGestures: true })
-        // this.activateAutoHide()// 手指离开后激活自动隐藏
+        this.activateAutoHide()// 手指离开后激活自动隐藏
         const speed = this.dotSpeed.state.dotWidth / this.progressBarLength.width
         // console.log('onPanResponderRelease speed:', speed, Math.max(0, duration * speed - 1))
         this.video && this.video.seek(Math.max(0, duration * speed - 1), 0)
@@ -157,6 +190,7 @@ class VideoPlayer extends React.Component {
       onPanResponderTerminate: (evt, gestureState) => {
         console.log('onPanResponderTerminate')
         this.isMoveDot = false// 判断是否触摸按住进度条上的点
+        this.activateAutoHide()// 手指离开后激活自动隐藏
         return true
       },
       onShouldBlockNativeResponder: (evt, gestureState) => {
@@ -183,6 +217,7 @@ class VideoPlayer extends React.Component {
     if (Platform.OS === 'android') {
       BackHandler.removeEventListener('hardwareBackPress', this.onBackPress)
     }
+    clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
   }
 
   onBackPress = () => {
@@ -448,14 +483,32 @@ class VideoPlayer extends React.Component {
       // 视频没有初始化的时候，禁止显示控制栏
       return
     }
+    clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
     if (!showControl) {
-      this.state.opacityControl.setValue(1)
+      this.AnimatedOp.start()
+
+      this.setState({
+        showControl: true
+      })
+
+      this.activateAutoHide()
     } else {
-      this.state.opacityControl.setValue(0)
+      this.fastHideConts()
     }
-    this.setState({
-      showControl: !showControl
+  }
+
+  // 快速隐藏控件
+  fastHideConts = () => {
+    this.fastHide.start(() => {
+      this.setState({
+        showControl: false
+      })
     })
+  }
+
+  // 激活自动隐藏
+  activateAutoHide = () => {
+    this.TimeHideConts = setTimeout(this.fastHideConts, 5000)
   }
 
   _onBackButton = () => {
@@ -676,7 +729,7 @@ class VideoPlayer extends React.Component {
               style={{
                 alignItems: 'center',
                 flexDirection: 'row',
-                paddingTop: isFullScreen ? 30 : statusBarTrans ? statusBarHeight : 15,
+                paddingTop: isFullScreen ? 30 : statusBarTrans ? statusBarHeight : 10,
                 paddingBottom: 5,
                 width: videoWidth
               }}
@@ -816,10 +869,11 @@ const styles = StyleSheet.create({
   },
   backButton: {
     flexDirection: 'row',
-    width: 30,
-    height: 30,
+    width: 26,
+    height: 26,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    marginLeft: 15
   },
   playButton: {
     width: 60,
@@ -829,7 +883,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'white',
     flex: 1,
-    marginHorizontal: 10
+    marginHorizontal: 10,
+    lineHeight: 26
   },
   controlPlayBtn: {
     position: 'absolute',

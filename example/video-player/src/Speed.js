@@ -55,7 +55,7 @@ class Speed extends React.PureComponent {
   }
 
   onLayout = (e) => {
-    console.log('onlayout:', JSON.stringify(e.nativeEvent.layout))
+    // console.log('onlayout:', JSON.stringify(e.nativeEvent.layout))
     const { setProgressBarLength } = this.props
     setProgressBarLength && setProgressBarLength(e.nativeEvent.layout)
     this.setState({
