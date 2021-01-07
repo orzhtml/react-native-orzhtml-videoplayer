@@ -45,6 +45,8 @@ class VideoDetails extends Component {
               }}
               navigation={navigation}
               // isFullScreen={true}
+              muted={true}
+              showMuted={true}
             />
           ) : null
         }
