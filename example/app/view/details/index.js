@@ -44,7 +44,7 @@ class VideoDetails extends Component {
                 navigation.goBack()
               }}
               navigation={navigation}
-            // isFullScreen={true}
+              // isFullScreen={true}
             />
           ) : null
         }

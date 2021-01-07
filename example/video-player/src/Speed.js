@@ -66,7 +66,7 @@ class Speed extends React.PureComponent {
   render () {
     const { props } = this
     const { nowTime, dotStart, dotWidth, progressBarLength } = this.state
-    // console.log(`render Speed dotStart:${dotStart} dotWidth:${dotWidth} barwidth:${progressBarLength.width}`)
+    // console.log(`render Speed dotStart:${dotStart} dotWidth:${dotWidth}`)
     // console.log('speed props.playDotX:', props.playDotX)
     // console.log('speed props.playBufferX:', props.playBufferX)
     return (
@@ -100,8 +100,7 @@ class Speed extends React.PureComponent {
             alignItems: 'center',
             position: 'relative',
             zIndex: 2,
-            marginLeft: 5,
-            marginRight: 15
+            marginRight: 5
           }}
           onLayout={this.onLayout}
         >
@@ -134,14 +133,15 @@ class Speed extends React.PureComponent {
             }}
           />
           {/* 进度条上的点 */}
-          <View
+          <Animated.View
             style={{
               alignItems: 'center',
               justifyContent: 'center',
-              left: -(props.dotWdt / 2),
+              left: dotStart ? dotWidth : (props.playDotX && props.playDotX !== undefined && props.playDotX !== null ? props.playDotX : 0),
               width: props.dotWdt,
               height: props.dotWdt,
-              position: 'relative',
+              marginLeft: -(props.dotWdt / 2),
+              position: 'absolute',
               zIndex: 4
             }}
             {...props.panHandlers}
@@ -155,7 +155,7 @@ class Speed extends React.PureComponent {
                 borderRadius: 14
               }}
             />
-          </View>
+          </Animated.View>
         </View>
       </View>
     )

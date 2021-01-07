@@ -41,12 +41,11 @@ class VideoPlayer extends React.Component {
     playWhenInactive: true, // 在通知或控制中心位于视频前面时是否应继续播放媒体
     showMinTitle: false, // 是否显示小视频标题
     videoMaxWidth: 0, // 默认小屏视频最大宽度
-    paddingX: 0, // 边距的值
     rate: [1, 1.25, 1.5, 1.75, 2], // 视频播放的速率
     isModal: false,
     isFullScreen: false,
     showPoster: null,
-    dotWidth: 14 // 进度条圆点宽度
+    dotWdt: 14 // 圆点直径
   }
 
   constructor (props) {
@@ -59,9 +58,12 @@ class VideoPlayer extends React.Component {
       videoHeight = videoWidth * 9 / 16
     }
 
+    this.paddingX = (screenWidth - videoWidth) / 2 // 边距的值
+
     if (props.isFullScreen) {
       videoWidth = screenHeight
       videoHeight = screenWidth
+      this.paddingX = 0 // 边距的值
     }
 
     this.state = {
@@ -104,7 +106,7 @@ class VideoPlayer extends React.Component {
       onMoveShouldSetPanResponder: (evt, gestureState) => true,
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
       onPanResponderGrant: (evt, gestureState) => {
-        const { dotWidth } = this.props
+        const { dotWdt } = this.props
         const { onload } = this.state
         if (!onload) return// 需要权限 或者视频还不可以播放时停止不允许滑动进度条
 
@@ -112,36 +114,41 @@ class VideoPlayer extends React.Component {
         // 开始手势操作。给用户一些视觉反馈，让他们知道发生了什么事情！
         this.touchX = evt.nativeEvent.locationX
         this.dotSpeed.setDotStart(true)
-        console.log('this.touchX:', evt.nativeEvent, gestureState, this.progressBarLength)
-        this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x - dotWidth)
+        // console.log('onPanResponderGrant evt.nativeEvent:', evt.nativeEvent)
+        this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x - this.paddingX - evt.nativeEvent.locationX + (dotWdt / 2))
       },
       onPanResponderMove: (evt, gestureState) => {
         // 最近一次的移动距离为gestureState.move{X,Y}
-        const { dotWidth } = this.props
+        const { navigation, dotWdt } = this.props
         const { onload } = this.state
         if (!onload) return// 需要权限 或者视频还不可以播放时停止不允许滑动进度条
 
-        // console.log('touchX:', this.touchX)
-        // console.log('evt.nativeEvent.pageX:', evt.nativeEvent)
-        this.realMarginLeft = gestureState.moveX - this.progressBarLength.x
+        navigation && navigation.setParams({ enableGestures: false })
+        // console.log('onPanResponderMove this.touchX:', this.touchX)
+        // console.log('onPanResponderMove evt.nativeEvent:', evt.nativeEvent)
+        // console.log('onPanResponderMove gestureState:', gestureState)
+
+        this.realMarginLeft = gestureState.moveX - this.progressBarLength.x - this.paddingX
         if (this.realMarginLeft >= this.progressBarLength.width) {
           this.realMarginLeft = this.progressBarLength.width
         }
         if (this.realMarginLeft > 0) {
-          if ((evt.nativeEvent.pageX - this.touchX - this.progressBarLength.x) >= this.progressBarLength.width) {
+          if ((evt.nativeEvent.pageX - this.touchX - this.progressBarLength.x - this.paddingX + (dotWdt / 2)) >= this.progressBarLength.width) {
             this.dotSpeed.setDotWidth(this.progressBarLength.width)
           } else {
-            this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x - dotWidth)
+            this.dotSpeed.setDotWidth(evt.nativeEvent.pageX - this.progressBarLength.x - this.paddingX - this.touchX + (dotWdt / 2))
           }
         }
         // 从成为响应者开始时的累计手势移动距离为gestureState.d{x,y}
       },
       onPanResponderTerminationRequest: (evt, gestureState) => true,
       onPanResponderRelease: (evt, gestureState) => {
+        const { navigation } = this.props
         const { duration } = this.state
+        navigation && navigation.setParams({ enableGestures: true })
         // this.activateAutoHide()// 手指离开后激活自动隐藏
         const speed = this.dotSpeed.state.dotWidth / this.progressBarLength.width
-        console.log('onPanResponderRelease speed:', speed, Math.max(0, duration * speed - 1))
+        // console.log('onPanResponderRelease speed:', speed, Math.max(0, duration * speed - 1))
         this.video && this.video.seek(Math.max(0, duration * speed - 1), 0)
         this.isMoveDot = false
       },
@@ -156,7 +163,7 @@ class VideoPlayer extends React.Component {
       }
     })
 
-    console.log('video-player init')
+    console.log('video-player init:', screenWidth, screenHeight)
   }
 
   componentDidMount () {
@@ -228,7 +235,7 @@ class VideoPlayer extends React.Component {
     const { onProgress } = this.props
 
     onProgress && onProgress(e)
-    console.log('this.isMoveDot _onProgress:', this.isMoveDot, JSON.stringify(e))
+    // console.log('this.isMoveDot _onProgress:', this.isMoveDot, JSON.stringify(e))
 
     if (e.currentTime === this.nowCurrentTime) {
       this.setState({
@@ -373,6 +380,7 @@ class VideoPlayer extends React.Component {
         paused: isPaused
       })
     } else {
+      this.paddingX = 0 // 边距的值
       this.setState({
         videoWidth: screenHeight,
         videoHeight: screenWidth,
@@ -409,6 +417,7 @@ class VideoPlayer extends React.Component {
         paused: isPaused
       })
     } else {
+      this.paddingX = (screenWidth - videoWidth) / 2 // 边距的值
       this.setState({
         videoWidth,
         videoHeight: videoWidth * 9 / 16,
@@ -564,7 +573,7 @@ class VideoPlayer extends React.Component {
       ignoreSilentSwitch, playWhenInactive, resizeMode,
       controls, showBack, enableSwitchScreen,
       statusBarTrans, videoStyles, showMinTitle,
-      rate, dotWidth
+      rate, dotWdt
     } = this.props
     const {
       videoUrl, poster, videoTitle,
@@ -579,9 +588,13 @@ class VideoPlayer extends React.Component {
       width: videoWidth
     }
 
-    console.log('render isPaused:', isPaused, videoSize)
+    // console.log('render isPaused:', isPaused, videoSize)
     return (
-      <View>
+      <View
+        onLayout={(e) => {
+          console.log('onlayout video bar e:', JSON.stringify(e.nativeEvent.layout))
+        }}
+      >
         { statusBar ? statusBar() : (<Header trans={statusBarTrans} isFullScreen={isFullScreen} />) }
         <View style={videoSize}>
           <TouchableOpacity
@@ -719,12 +732,12 @@ class VideoPlayer extends React.Component {
                   nowTime={this.nowTime}
                   panHandlers={this._panSpeeDot.panHandlers}
                   allTime={allTime}
-                  dotWdt={dotWidth}
                   playDotX={this.playDotX}
                   playBufferX={this.playBufferX}
                   isMoveDot={this.isMoveDot}
                   videoWidth={videoWidth}
                   setProgressBarLength={this._setProgressBarLength}
+                  dotWdt={dotWdt}
                 />
                 {
                   enableSwitchScreen ? (

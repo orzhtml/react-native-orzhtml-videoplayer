@@ -82,6 +82,7 @@ class VideoModal extends React.Component {
             isFullScreen={true}
             showPoster={false}
             autoPlay={false}
+            paddingX={0}
             // 协调局部、全屏播放进度
             onChangeFullScreen={this.onChangeFullScreen}
             onLoad={this._onLoadVideoModal}
