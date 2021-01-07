@@ -42,7 +42,7 @@ class VideoModal extends React.Component {
       }, () => {
         console.log('lockToPortrait:', 'small', seekTime, buffer)
         this.videoPlayer && this.videoPlayer.updateVideo({
-          seekTime: seekTime - 1,
+          seekTime: Math.max(0, seekTime - 1),
           buffer,
           paused: paused
         })
@@ -52,7 +52,7 @@ class VideoModal extends React.Component {
 
   _onLoadVideoModal = () => {
     this.videoModal && this.videoModal.updateVideo({
-      seekTime: this.seekTime - 1,
+      seekTime: Math.max(0, this.seekTime - 1),
       buffer: this.buffer,
       paused: this.paused
     })

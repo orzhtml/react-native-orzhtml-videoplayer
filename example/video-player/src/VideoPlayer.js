@@ -615,7 +615,8 @@ class VideoPlayer extends React.Component {
       isPaused: true,
       showControl: false,
       showLoading: false,
-      isSuspended: true
+      isSuspended: true,
+      showPoster: true
     })
   }
 
