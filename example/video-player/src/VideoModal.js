@@ -18,18 +18,18 @@ class VideoModal extends React.Component {
   }
 
   _onLoadVideo = (data) => {
-    const { onLoadVideo } = this.props
-    onLoadVideo && onLoadVideo(data)
+    const { onLoad } = this.props
+    onLoad && onLoad(data, 'small')
   }
 
   _onLoadVideoModal = (data) => {
-    const { onLoadVideoModal } = this.props
-    onLoadVideoModal && onLoadVideoModal(data)
+    const { onLoad } = this.props
     this.videoModal && this.videoModal.updateVideo({
       seekTime: Math.max(0, this.seekTime - 1),
       buffer: this.buffer,
       paused: this.paused
     })
+    onLoad && onLoad(data, 'full')
   }
 
   _onChangeFullScreen = ({ screen, seekTime, buffer, paused }) => {

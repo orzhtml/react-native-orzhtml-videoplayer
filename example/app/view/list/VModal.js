@@ -6,45 +6,52 @@ import { VideoModal } from '../../../video-player'
 class VModal extends Component {
   constructor (props) {
     super(props)
-
     const { params } = props.route
-    console.log('params:', params)
-
     this.state = {
       videoUrl: params.videoUrl,
       videoImage: params.videoImage,
       videoTitle: params.videoTitle,
-      autoPlay: true
+      autoPlay: true,
+      modalFull: true
     }
   }
 
-  _onLoadVideoModal = () => {
+  _onLoadVideoModal = (data, screen) => {
     console.log('_onLoadVideoModal')
-    // const { params } = this.props.route
-    // this.VideoModal && this.VideoModal.updateVideo({
-    //   seekTime: Math.max(0, params.currentTime - 1),
-    //   buffer: Math.max(0, params.playableDuration),
-    //   paused: false
-    // })
+    const { params } = this.props.route
+    const { modalFull } = this.state
+    if (modalFull && screen === 'full') {
+      this.videoModal && this.videoModal.onFullUpdateVideo({
+        seekTime: Math.max(0, params.currentTime - 1),
+        buffer: Math.max(0, params.playableDuration),
+        paused: false
+      })
+    } else {
+      this.videoModal && this.videoModal.onSmallUpdateVideo({
+        seekTime: Math.max(0, params.currentTime - 1),
+        buffer: Math.max(0, params.playableDuration),
+        paused: false
+      })
+    }
   }
 
   _onEnd = (screen) => {
     console.log('_onEnd screen:', screen)
     if (screen === 'full') {
-      this.VideoModal && this.VideoModal.onFullScreen(false)
+      this.videoModal && this.videoModal.onFullScreen(false)
     }
   }
 
   render () {
     const { navigation } = this.props
-    const { videoUrl, videoImage, videoTitle, autoPlay } = this.state
+    const { videoUrl, videoImage, videoTitle, autoPlay, modalFull } = this.state
 
     return (
       <View style={{ flex: 1 }}>
         {
           videoUrl ? (
             <VideoModal
-              ref={v => (this.VideoModal = v)}
+              ref={v => (this.videoModal = v)}
               videoUrl={videoUrl}
               // statusBarTrans={true}
               videoTitle={videoTitle}
@@ -54,7 +61,7 @@ class VModal extends Component {
                 navigation.goBack()
               }}
               navigation={navigation}
-              modalFull={true}
+              modalFull={modalFull}
               showMinTitle={true}
               muted={true}
               showMuted={true}
