@@ -6,8 +6,10 @@ import {
 } from '@react-navigation/stack'
 
 import Home from './view/home'
-import VideoList from './view/list'
 import VideoDetails from './view/details'
+import VideoList from './view/list'
+import ListDls from './view/list/ListDls'
+import VModal from './view/list/VModal'
 
 const RootStack = createStackNavigator()
 
@@ -42,6 +44,24 @@ function Router () {
           }}
         />
         <RootStack.Screen name="VideoDetails" component={VideoDetails}
+          options={({ route }) => {
+            const { params } = route
+            return {
+              gestureEnabled: params && params.enableGestures,
+              ...TransitionPresets.SlideFromRightIOS
+            }
+          }}
+        />
+        <RootStack.Screen name="ListDls" component={ListDls}
+          options={({ route }) => {
+            const { params } = route
+            return {
+              gestureEnabled: params && params.enableGestures,
+              ...TransitionPresets.SlideFromRightIOS
+            }
+          }}
+        />
+        <RootStack.Screen name="VModal" component={VModal}
           options={({ route }) => {
             const { params } = route
             return {

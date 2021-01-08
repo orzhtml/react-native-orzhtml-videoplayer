@@ -24,8 +24,6 @@ import Speed from './Speed'
 class VideoPlayer extends React.Component {
   static defaultProps = {
     autoPlay: false, // 控制播放器是否自动播放
-    showBack: true,
-    enableSwitchScreen: true, // 是否显示切换全屏按钮
     statusBar: null, // 状态栏
     statusBarTrans: false, // 是否沉侵式 状态栏
     poster: null, // 加载视频时要显示的图像
@@ -41,11 +39,16 @@ class VideoPlayer extends React.Component {
     playWhenInactive: true, // 在通知或控制中心位于视频前面时是否应继续播放媒体
     showMinTitle: false, // 是否显示小视频标题
     videoMaxWidth: 0, // 默认小屏视频最大宽度
-    rate: [1, 1.25, 1.5, 1.75, 2], // 视频播放的速率
+    rate: [1, 1.5, 2, 3], // 视频播放的速率
     isModal: false,
     isFullScreen: false,
+    showBack: true,
+    enableSwitchScreen: true, // 是否显示切换全屏按钮
     showPoster: null,
     showMuted: false, // 是否显示静音按钮
+    showRate: false, // 是否显示倍率按钮
+    showVolume: false, // 是否显示调节音量功能，TODO：调节系统音量
+    showBrightness: false, // 是否显示亮度功能，TODO: 调节系统亮度
     dotWdt: 14 // 圆点直径
   }
 
@@ -181,7 +184,7 @@ class VideoPlayer extends React.Component {
         const { navigation } = this.props
         const { duration } = this.state
         navigation && navigation.setParams({ enableGestures: true })
-        this.activateAutoHide()// 手指离开后激活自动隐藏
+        this._activateAutoHide()// 手指离开后激活自动隐藏
         const speed = this.dotSpeed.state.dotWidth / this.progressBarLength.width
         // console.log('onPanResponderRelease speed:', speed, Math.max(0, duration * speed - 1))
         this.video && this.video.seek(Math.max(0, duration * speed - 1), 0)
@@ -190,7 +193,7 @@ class VideoPlayer extends React.Component {
       onPanResponderTerminate: (evt, gestureState) => {
         console.log('onPanResponderTerminate')
         this.isMoveDot = false// 判断是否触摸按住进度条上的点
-        this.activateAutoHide()// 手指离开后激活自动隐藏
+        this._activateAutoHide()// 手指离开后激活自动隐藏
         return true
       },
       onShouldBlockNativeResponder: (evt, gestureState) => {
@@ -212,24 +215,15 @@ class VideoPlayer extends React.Component {
     }
   }
 
-  componentDidUpdate () {
-    const { muted } = this.props
-    // 静音判断
-    console.log('componentDidUpdate muted:', muted)
-    if (muted !== this.state.muted) {
-      this._setMuted(muted)
-    }
-  }
-
   componentWillUnmount () {
     Orientation.lockToPortrait()
     if (Platform.OS === 'android') {
-      BackHandler.removeEventListener('hardwareBackPress', this.onBackPress)
+      BackHandler.removeEventListener('hardwareBackPress', this._onBackPress)
     }
     clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
   }
 
-  onBackPress = () => {
+  _onBackPress = () => {
     return true
   }
 
@@ -263,7 +257,7 @@ class VideoPlayer extends React.Component {
   _onEnd = (e) => {
     console.log('_onEnd e:', e)
     const { onEnd, repeat } = this.props
-    const { isPaused } = this.state
+    const { isPaused, isFullScreen } = this.state
     !repeat && this.setState({
       showControl: true,
       opacity: 1,
@@ -271,7 +265,7 @@ class VideoPlayer extends React.Component {
       isEnd: true
     })
     if (!isPaused) {
-      onEnd && onEnd()
+      onEnd && onEnd(isFullScreen ? 'full' : 'small', this.nowCurrentTime, this.nowBufferX)
     }
   }
 
@@ -301,7 +295,7 @@ class VideoPlayer extends React.Component {
     this.nowTime = formatTime(e.currentTime)
     !this.isMoveDot && this.dotSpeed && this.dotSpeed.setSpeed(e)
 
-    this.animatedChange(e.currentTime, e.playableDuration)
+    this._animatedChange(e.currentTime, e.playableDuration)
   }
 
   _onBuffer = (e) => {
@@ -345,7 +339,7 @@ class VideoPlayer extends React.Component {
     if (isEnd) {
       this.video.seek(0)
       this.nowTime = '00:00'
-      this.animatedChange(0, 0)
+      this._animatedChange(0, 0)
       this.setState({
         showPoster: false, // 正在播放不显示海报
         isPaused: false,
@@ -362,7 +356,7 @@ class VideoPlayer extends React.Component {
           console.log('处于暂停状态，还原播放进度')
           this.video.seek(this.nowCurrentTime)
           this.nowTime = formatTime(this.nowCurrentTime)
-          this.animatedChange(this.nowCurrentTime, this.nowBufferX)
+          this._animatedChange(this.nowCurrentTime, this.nowBufferX)
           this.setState({
             isSuspended: false
           })
@@ -373,14 +367,7 @@ class VideoPlayer extends React.Component {
     onPlay && onPlay(_isPause_)
   }
 
-  _setMuted = (muted) => {
-    console.log('_setMuted muted:', muted)
-    this.setState({
-      muted: muted
-    })
-  }
-
-  animatedChange = (seekTime, buffer) => {
+  _animatedChange = (seekTime, buffer) => {
     Animated.timing(
       // timing方法使动画值随时间变化
       this.dotX, // 要变化的动画值
@@ -507,14 +494,14 @@ class VideoPlayer extends React.Component {
         showControl: true
       })
 
-      this.activateAutoHide()
+      this._activateAutoHide()
     } else {
-      this.fastHideConts()
+      this._fastHideConts()
     }
   }
 
   // 快速隐藏控件
-  fastHideConts = () => {
+  _fastHideConts = () => {
     this.fastHide.start(() => {
       this.setState({
         showControl: false
@@ -523,8 +510,8 @@ class VideoPlayer extends React.Component {
   }
 
   // 激活自动隐藏
-  activateAutoHide = () => {
-    this.TimeHideConts = setTimeout(this.fastHideConts, 5000)
+  _activateAutoHide = () => {
+    this.TimeHideConts = setTimeout(this._fastHideConts, 5000)
   }
 
   _onBackButton = () => {
@@ -570,7 +557,7 @@ class VideoPlayer extends React.Component {
       extrapolate: 'clamp'
     })
 
-    this.animatedChange(this.nowCurrentTime, this.nowBufferX)
+    this._animatedChange(this.nowCurrentTime, this.nowBufferX)
 
     this.setState({
       refreshVideo: !this.state.refreshVideo
@@ -601,7 +588,22 @@ class VideoPlayer extends React.Component {
     })
     this.video.seek(seekTime)
     this.nowTime = formatTime(seekTime)
-    this.animatedChange(seekTime, buffer)
+    this._animatedChange(seekTime, buffer)
+  }
+
+  // 设置静音开关
+  setMuted = (muted) => {
+    console.log('设置静音开关:', muted)
+    this.setState({
+      muted: muted
+    })
+  }
+
+  // 设置倍率
+  setRate = (index) => {
+    this.setState({
+      rateIndex: index
+    })
   }
 
   // 变更全屏方式
@@ -616,6 +618,7 @@ class VideoPlayer extends React.Component {
   // 暂停视频
   onStopPlay = () => {
     console.log('onStopPlay 暂停视频')
+    clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
     this.setState({
       isPaused: true,
       showControl: false,
@@ -626,6 +629,7 @@ class VideoPlayer extends React.Component {
   // 其他视频在播放的时候暂停上一个视频
   onStopListPlay = () => {
     console.log('onStopListPlay 其他视频在播放的时候暂停上一个视频')
+    clearTimeout(this.TimeHideConts)// 拖动进度条时禁止隐藏控件
     this.setState({
       onload: false,
       isPaused: true,
