@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   extends: '@react-native-community',
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react', 'react-native', 'react-hooks'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
@@ -13,4 +13,15 @@ module.exports = {
       },
     },
   ],
+  globals: {
+    __DEV__: true,
+    __dirname: false,
+    GLOBAL: true,
+    fetch: true,
+  },
+  settings: {
+    react: {
+        version: '17.0.2'
+    }
+  }
 };
