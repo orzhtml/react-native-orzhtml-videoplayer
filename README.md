@@ -11,23 +11,12 @@ react-native video 视频控制组件
 
 `npm install react-native-orzhtml-videoplayer --save` or `yarn add react-native-orzhtml-videoplayer`
 
-`npm install react-native-orientation --save` or `yarn add react-native-orientation`
+`npm install react-native-orientation-locker --save` or `yarn add react-native-orientation-locker`
 
-**For React Native 0.60.0 or higher.**
+`npm install react-native-linear-gradient --save` or `yarn add react-native-linear-gradient`
 
 `npm install react-native-video --save` or `yarn add react-native-video`
 
-**For React Native <= 0.59.x use version 6.1.1 or lower**
-
-`npm install react-native-video@4.4.4 --save` or `yarn add react-native-video@4.4.4`
-
-## Mostly automatic installation
-
-```
-react-native link react-native-video
-
-react-native link react-native-orientation
-```
 
 ## Example
 
@@ -38,7 +27,7 @@ cd example
 
 npm install // or yarn
 
-react-native link
+cd ios/ && pod install
 ```
 
 To run example on iOS:
@@ -53,8 +42,11 @@ To run example on Android:
 
 Prop | Description | Type | Required/Default
 ------ | ------ | ------ | ------
-`VideoPlayer`|视频模块||
+`VideoPlayer`|视频模块|      |
+`VideoModal`|全屏Modal视频模块|      |
 `defaultVideoHeight`|视频默认竖屏的高度|`number`|
 `statusBarHeight`|状态栏高度|`number`
 `screenWidth`|屏幕宽度|`number`
 `screenHeight`|屏幕高度|`number`
+
+
