@@ -1,5 +1,5 @@
-import React from "react"
-import { View } from "react-native"
+import React, { useRef } from "react"
+import { View, Animated, Easing } from "react-native"
 
 const videoList = [{
   newId: '1111',
@@ -53,6 +53,7 @@ const videoList = [{
 }]
 
 const VideoList = (props: any) => {
+  // const spinValue = useRef<any>(new Animated.Value())
   return (
     <View />
   )

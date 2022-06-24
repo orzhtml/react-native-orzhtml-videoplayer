@@ -1,9 +1,6 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
-import {
-  createStackNavigator,
-  TransitionPresets
-} from '@react-navigation/stack'
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'
 
 import Home from './view/Home'
 import VideoDetails from './view/VideoDetails'

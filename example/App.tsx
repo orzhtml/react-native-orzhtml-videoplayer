@@ -17,13 +17,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import Router from './app/router'
 
-const App = () => {
+const App: React.FC<{}> = () => {
   return (
     <SafeAreaProvider style={{ flex: 1 }}>
       <StatusBar translucent backgroundColor='transparent' barStyle={'dark-content'} />
       <Router />
     </SafeAreaProvider>
   )
-}
+};
 
 export default App;
