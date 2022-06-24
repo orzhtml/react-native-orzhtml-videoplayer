@@ -1,5 +1,10 @@
-import React, { useRef } from "react"
-import { View, Animated, Easing } from "react-native"
+import React, { useRef, useState } from "react"
+import { View, FlatList } from "react-native"
+
+import { getStatusBarHeight } from '../common/StatusBarHeight'
+import { VideoPlayer } from '../libs/videoPlayer'
+
+import VideoCell from './VideoCell'
 
 const videoList = [{
   newId: '1111',
@@ -53,9 +58,46 @@ const videoList = [{
 }]
 
 const VideoList = (props: any) => {
-  // const spinValue = useRef<any>(new Animated.Value())
+  const _flatListRef = useRef<FlatList>(null)
+  const [full, setFull] = useState(false)
+  const { navigation } = props
+
+  const _renderItemComponent = ({ item, index }) => {
+    return (
+      <VideoCell
+        navigation={navigation}
+        data={item}
+        idx={index}
+        onFullScreen={onFullScreen}
+      />
+    )
+  }
+
+  const onFullScreen = (full) => {
+    console.log('111 onFullScreen:', full);
+    setFull(full)
+  }
+
   return (
-    <View />
+    <View style={{ flex: 1 }}>
+      <View style={{ height: getStatusBarHeight() }} />
+      <FlatList
+        ref={_flatListRef}
+        style={{ position: 'relative', zIndex: 1 }}
+        data={videoList}
+        renderItem={_renderItemComponent}
+        keyExtractor={(item, index) => `item-${item.newId}-${index}`}
+      />
+      {
+        full ? (
+          <VideoPlayer
+            isFullScreen={true}
+            statusBar={() => { }}
+            onFullScreen={onFullScreen}
+          />
+        ) : null
+      }
+    </View >
   )
 }
 
