@@ -1,14 +1,13 @@
 import React, { forwardRef, useRef, useState, useImperativeHandle, useEffect } from "react"
 import { StyleSheet, StatusBar, View, Animated, Easing, Text, TouchableOpacity } from "react-native"
+import Modal from 'react-native-modal'
 
 import { defaultVideoHeight, isIOS, screenHeight, screenWidth, statusBarHeight } from '../common/Utils'
 
 const VideoPlayer = (props) => {
-  let _spinValue = useRef<any>(new Animated.Value(1)).current
   const [rotate, setRotate] = useState('0deg')
   const [videoWidth, setVideoWidth] = useState(screenWidth)
   const [videoHeight, setVideoHeight] = useState(defaultVideoHeight)
-  const [topHeight, setTopHeight] = useState(statusBarHeight)
   const [leftHeight, setLeftHeight] = useState(0)
   const [isFullScreen, setIsFulScreen] = useState(props.isFullScreen)
 
@@ -19,78 +18,40 @@ const VideoPlayer = (props) => {
   useEffect(() => {
     if (props.isFullScreen) {
       console.log('isFullScreen:', props.isFullScreen);
-      spinRotate(props.isFullScreen)
+      setVideoLayout(props.isFullScreen)
     }
   }, [])
 
-  const spinRotate = (screen) => {
-    _spinValue.setValue(0)
-    Animated.timing(_spinValue, {
-      toValue: 1, // 最终值 为1，这里表示最大旋转 360度
-      duration: 0,
-      useNativeDriver: false,
-      easing: Easing.linear
-    }).start(() => {
-      setSpinAnimated(screen)
-    })
-  }
-
-  const setSpinAnimated = (screen) => {
-    let _width = [screenWidth, screenHeight]
-    let _height = [defaultVideoHeight, screenWidth]
-    let _top = [statusBarHeight, (screenHeight / 2) - (screenWidth / 2)]
-    let _left = [0, -((screenHeight / 2) - (screenWidth / 2))]
-    let _rotate = ['0deg', '90deg']
+  const setVideoLayout = (screen) => {
+    let _width = screenHeight
+    let _height = screenWidth
+    let _left = -((screenHeight / 2) - (screenWidth / 2))
+    let _rotate = '90deg'
     let _isFull = true
 
     if (!screen) {
-      _width = [screenHeight, screenWidth]
-      _height = [screenWidth, defaultVideoHeight]
-      _top = [(screenHeight / 2) - (screenWidth / 2), statusBarHeight]
-      _left = [-((screenHeight / 2) - (screenWidth / 2)), 0]
-      _rotate = ['90deg', '0deg']
+      _width = screenWidth
+      _height = defaultVideoHeight
+      _left = 0
+      _rotate = '0deg'
       _isFull = false
     }
 
-    console.log('_width:', _width);
-    console.log('_height:', _height);
-    console.log('_left:', _left);
-    console.log('_top:', _top);
+    // console.log('_width:', _width);
+    // console.log('_height:', _height);
+    // console.log('_left:', _left);
 
-    const rot = _spinValue.interpolate({
-      inputRange: [0, 1],//输入值
-      outputRange: _rotate
-    })
-    let width = _spinValue.interpolate({
-      inputRange: [0, 1],//输入值
-      outputRange: _width //输出值
-    })
-    let height = _spinValue.interpolate({
-      inputRange: [0, 1],//输入值
-      outputRange: _height //输出值
-    })
-    let top = _spinValue.interpolate({
-      inputRange: [0, 1],//输入值
-      outputRange: _top //输出值
-    })
-    let left = _spinValue.interpolate({
-      inputRange: [0, 1],//输入值
-      outputRange: _left //输出值
-    })
-
-    setVideoWidth(width)
-    setVideoHeight(height)
-    setTopHeight(top)
-    setLeftHeight(left)
-    setRotate(rot)
+    setVideoWidth(_width)
+    setVideoHeight(_height)
+    setLeftHeight(_left)
+    setRotate(_rotate)
     setIsFulScreen(_isFull)
-    // props.changeFullScreen && props.changeFullScreen(_isFull)
   }
 
   const onFullScreen = () => {
 
   }
-
+  console.log('isFullScreenisFullScreen:', isFullScreen);
   return (
     <>
       {
@@ -99,18 +60,17 @@ const VideoPlayer = (props) => {
             backgroundColor: 'yellow',
             height: isIOS ? statusBarHeight : 0,
           }}>
-            <StatusBar translucent={true} barStyle={props.isDark ? 'light-content' : 'dark-content'} />
+            <StatusBar hidden={isFullScreen} translucent={true} barStyle={props.isDark ? 'light-content' : 'dark-content'} />
           </View>
         )
       }
-      <Animated.View
+      <View
         style={[
           lineStyles.videoStyles,
           props.videoStyles,
           {
             width: videoWidth,
             height: videoHeight,
-            top: props.statusHeight ? props.statusHeight() : topHeight,
             left: leftHeight,
             transform: [
               {
@@ -132,15 +92,20 @@ const VideoPlayer = (props) => {
             onPress={() => {
               let _isFullScreen = !isFullScreen
               console.log('_isFullScreen:', _isFullScreen)
-              props.onFullScreen && props.onFullScreen(_isFullScreen)
-              setIsFulScreen(_isFullScreen)
+              if (isFullScreen) {
+                // 显示横屏后调用这个
+                props.onModalFullScreen && props.onModalFullScreen(_isFullScreen)
+              } else {
+                // 非横屏调用这个
+                props.onFullScreen && props.onFullScreen(_isFullScreen)
+              }
               // spinRotate(!isFullScreen)
             }}
           >
             <Text>全屏</Text>
           </TouchableOpacity>
         </View>
-      </Animated.View>
+      </View>
     </>
   )
 }
@@ -159,8 +124,7 @@ const lineStyles = StyleSheet.create({
     padding: 10,
     borderWidth: 2,
     borderColor: 'red',
-    position: 'absolute',
-    zIndex: 99
+    position: 'relative',
   },
 })
 

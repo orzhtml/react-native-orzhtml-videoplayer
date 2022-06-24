@@ -1,11 +1,10 @@
 import React, { useState } from "react"
 import { TouchableOpacity, View, Text } from "react-native"
 
-import { defaultVideoHeight, screenWidth } from '../common/Utils'
-import { VideoPlayer } from '../libs/videoPlayer'
+import { VideoModal } from '../libs/videoPlayer'
 
 const VideoCell = (props) => {
-  const { data, idx, onFullScreen } = props
+  const { data, idx } = props
 
   return (
     <View style={{
@@ -14,20 +13,12 @@ const VideoCell = (props) => {
       paddingVertical: 10,
       position: 'relative',
     }}>
-      <View style={{
-        backgroundColor: '#0ff',
-        width: screenWidth,
-        height: defaultVideoHeight
-      }}>
-        <VideoPlayer
-          statusBar={() => { }}
-          statusHeight={() => 0}
-          videoStyles={{
-            backgroundColor: idx === 0 ? 'yellow' : 'transparent',
-          }}
-          onFullScreen={onFullScreen}
-        />
-      </View>
+      <VideoModal
+        statusBar={() => null}
+        videoStyles={{
+          backgroundColor: idx === 0 ? 'yellow' : 'transparent',
+        }}
+      />
       <TouchableOpacity
         activeOpacity={1}
         style={{

@@ -59,7 +59,6 @@ const videoList = [{
 
 const VideoList = (props: any) => {
   const _flatListRef = useRef<FlatList>(null)
-  const [full, setFull] = useState(false)
   const { navigation } = props
 
   const _renderItemComponent = ({ item, index }) => {
@@ -68,14 +67,8 @@ const VideoList = (props: any) => {
         navigation={navigation}
         data={item}
         idx={index}
-        onFullScreen={onFullScreen}
       />
     )
-  }
-
-  const onFullScreen = (full) => {
-    console.log('111 onFullScreen:', full);
-    setFull(full)
   }
 
   return (
@@ -88,16 +81,7 @@ const VideoList = (props: any) => {
         renderItem={_renderItemComponent}
         keyExtractor={(item, index) => `item-${item.newId}-${index}`}
       />
-      {
-        full ? (
-          <VideoPlayer
-            isFullScreen={true}
-            statusBar={() => { }}
-            onFullScreen={onFullScreen}
-          />
-        ) : null
-      }
-    </View >
+    </View>
   )
 }
 

@@ -24,9 +24,9 @@
   },
   "homepage": "https://github.com/orzhtml/react-native-orzhtml-videoplayer#readme",
   "peerDependencies": {
-    "react-native-linear-gradient": "*",
     "react": "*",
     "react-native": "*",
+    "react-native-linear-gradient": "*",
     "react-native-orientation-locker": "*",
     "react-native-video": "*"
   },
@@ -41,5 +41,6 @@
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-native": "^3.7.0",
     "eslint-plugin-standard": "^4.0.0"
-  }
+  },
+  "dependencies": {}
 }

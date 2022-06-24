@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react"
-import { ScrollView, View, Text } from "react-native"
+import { ScrollView, View, Text, TouchableOpacity } from "react-native"
+
+import { defaultVideoHeight, screenHeight, screenWidth, statusBarHeight } from '../common/Utils'
+import { VideoModal } from '../libs/videoPlayer'
 
 const VideoDetails = (props: any) => {
   const [state, setState] = useState<any>({
@@ -23,26 +26,8 @@ const VideoDetails = (props: any) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {
-        // videoUrl ? (
-        //   <VideoPlayer
-        //     ref={v => (this.VideoPlayer = v)}
-        //     videoUrl={videoUrl}
-        //     // statusBarTrans={true}
-        //     videoTitle={videoTitle}
-        //     autoPlay={autoPlay}
-        //     poster={videoImage}
-        //     onBackButton={() => {
-        //       navigation.goBack()
-        //     }}
-        //     navigation={navigation}
-        //     // isFullScreen={true}
-        //     showMinTitle={true}
-        //     muted={true}
-        //     showMuted={true}
-        //   />
-        // ) : null
-      }
+      {/* <View style={{ height: statusBarHeight }} /> */}
+      <VideoModal />
       <ScrollView>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
