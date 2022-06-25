@@ -10,14 +10,18 @@ const VideoCell = (props) => {
     <View style={{
       borderBottomWidth: 1,
       borderBottomColor: 'red',
-      paddingVertical: 10,
       position: 'relative',
     }}>
       <VideoModal
         statusBar={() => null}
-        videoStyles={{
-          backgroundColor: idx === 0 ? 'yellow' : 'transparent',
-        }}
+        videoStyles={[
+          idx === 0 ?
+          {
+            backgroundColor: 'yellow',
+          } : null
+        ]}
+        {...data}
+        autoPlay={!data.isPaused}
       />
       <TouchableOpacity
         activeOpacity={1}

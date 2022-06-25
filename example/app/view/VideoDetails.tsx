@@ -7,7 +7,7 @@ import { VideoModal } from '../libs/videoPlayer'
 const VideoDetails = (props: any) => {
   const [state, setState] = useState<any>({
     videoUrl: null,
-    videoImage: null,
+    poster: null,
     videoTitle: null,
     autoPlay: false
   })
@@ -18,7 +18,7 @@ const VideoDetails = (props: any) => {
       setState({
         ...state,
         videoUrl: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/HK9.mp4',
-        videoImage: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
+        poster: 'https://kavt.oss-cn-shanghai.aliyuncs.com/VIDEO/667.png',
         videoTitle: '这是可全屏的播放组件'
       })
     }, 1500)
@@ -27,8 +27,9 @@ const VideoDetails = (props: any) => {
   return (
     <View style={{ flex: 1 }}>
       {/* <View style={{ height: statusBarHeight }} /> */}
-      <VideoModal />
+      <VideoModal {...state} navigation={navigation} />
       <ScrollView>
+        <Text>{state.videoTitle}</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
