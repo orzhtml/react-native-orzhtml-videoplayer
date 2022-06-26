@@ -32,7 +32,6 @@ const VideoModal = (props) => {
       {
         isModalVisible ? (
           <Modal
-            {...props}
             style={{ margin: 0, position: 'relative', zIndex: 2 }}
             isVisible={true}
             statusBarTranslucent={true}

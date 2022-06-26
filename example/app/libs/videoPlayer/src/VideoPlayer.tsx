@@ -111,7 +111,7 @@ const VideoPlayerView = (props) => {
         },
       })
     }
-  }, [muted]), [props.muted])
+  }, [muted, props.muted]), [props.muted])
   // 安卓返回按钮
   const onBackPress = () => {
     return true
@@ -346,7 +346,7 @@ const VideoPlayerView = (props) => {
     return view
   }
 
-  console.log('videoPlayer videoUrl:', videoUrl, 'showPoster:', showPoster, 'poster:', poster, 'showVideo:', showVideo)
+  console.log('videoPlayer videoUrl:', videoUrl, 'showPoster:', showPoster, 'poster:', poster, 'showVideo:', showVideo, 'muted:', props.muted)
 
   return (
     <View>

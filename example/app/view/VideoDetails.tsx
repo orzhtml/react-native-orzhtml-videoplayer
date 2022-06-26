@@ -26,7 +26,6 @@ const VideoDetails = (props: any) => {
   }, [])
 
   const onMuted = (e) => {
-    console.log('onMuted 1:', e);
     setState({
       ...state,
       muted: e
