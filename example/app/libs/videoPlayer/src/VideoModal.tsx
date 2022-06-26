@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useState } from "react"
-import { StatusBar, View } from "react-native"
+import React, { useRef, useState } from "react"
+import { StatusBar } from "react-native"
 import Modal from 'react-native-modal'
-
-import { defaultVideoHeight, screenWidth } from "../common/Utils"
 
 import VideoPlayer from './VideoPlayer'
 
@@ -13,11 +11,13 @@ const VideoModal = (props) => {
 
   const onFullScreen = (isFull) => {
     // console.log('VideoModal onFullScreen:', isFull);
+    videoPlayerRef.current?.onStopPlay()
     setModalVisible(isFull)
   }
 
   const onModalFullScreen = (isFull) => {
     // console.log('VideoModal onModalFullScreen:', isFull);
+    _videoModalRef.current?.onStopPlay()
     setModalVisible(isFull)
   }
 
@@ -33,8 +33,7 @@ const VideoModal = (props) => {
         isModalVisible ? (
           <Modal
             {...props}
-            style={{ margin: 0 }}
-            ref={_videoModalRef}
+            style={{ margin: 0, position: 'relative', zIndex: 2 }}
             isVisible={true}
             statusBarTranslucent={true}
             animationInTiming={10}
@@ -43,6 +42,7 @@ const VideoModal = (props) => {
           >
             <VideoPlayer
               {...props}
+              ref={_videoModalRef}
               isFullScreen={true}
               statusBar={() => <StatusBar hidden={true} translucent={true} />}
               isModal={true}

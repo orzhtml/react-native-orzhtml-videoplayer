@@ -9,7 +9,8 @@ const VideoDetails = (props: any) => {
     videoUrl: null,
     poster: null,
     videoTitle: null,
-    autoPlay: false
+    autoPlay: false,
+    muted: false
   })
   const { navigation } = props
 
@@ -24,10 +25,25 @@ const VideoDetails = (props: any) => {
     }, 1500)
   }, [])
 
+  const onMuted = (e) => {
+    console.log('onMuted 1:', e);
+    setState({
+      ...state,
+      muted: e
+    })
+  }
+
   return (
     <View style={{ flex: 1 }}>
       {/* <View style={{ height: statusBarHeight }} /> */}
-      <VideoModal {...state} navigation={navigation} />
+      <VideoModal
+        {...state}
+        navigation={navigation}
+        onBackButton={() => {
+          navigation.goBack()
+        }}
+        onMuted={onMuted}
+      />
       <ScrollView>
         <Text>{state.videoTitle}</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>

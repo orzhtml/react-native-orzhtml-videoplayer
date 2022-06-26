@@ -1,8 +1,9 @@
-import React, { forwardRef, useRef, useState, useImperativeHandle, useEffect, useCallback, useContext } from "react"
+import React, { forwardRef, useRef, useState, useImperativeHandle, useEffect, useCallback, useContext, useMemo, memo } from "react"
 import { StyleSheet, View, Animated, Easing, Text, TouchableOpacity, BackHandler, Image } from "react-native"
 import Video from 'react-native-video'
+import LinearGradient from "react-native-linear-gradient"
 
-import { defaultVideoHeight, formatTime, isIOS, screenHeight, screenWidth } from '../common/Utils'
+import { defaultVideoHeight, formatTime, isIOS, screenHeight, screenWidth, statusBarHeight } from '../common/Utils'
 import VideoImages from '../common/Images'
 import { VPlayerContext, VPlayerProvider } from "../models/vPlayer"
 
@@ -15,9 +16,40 @@ const VideoPlayerView = (props) => {
     isPaused, muted, showPoster, poster, videoUrl,
     videoTitle, rateIndex, isLoad, isError, showLoading,
     showVideo, showPlayBtn, duration, allTime, isEnd,
-    isSuspended,
+    isSuspended, showControl,
   } = state
   const _videoRef = useRef<Video>(null)
+  const opacityControl = useRef(new Animated.Value(0))
+  // 控件显示动画
+  const AnimatedOp = useRef(Animated.timing(
+    // timing方法使动画值随时间变化
+    opacityControl.current, // 要变化的动画值
+    {
+      toValue: 1, // 最终的动画值
+      duration: 300,
+      useNativeDriver: false,
+    },
+  ))
+  // 控件隐藏动画
+  const fastHide = useRef(Animated.timing(
+    // timing方法使动画值随时间变化
+    opacityControl.current, // 要变化的动画值
+    {
+      toValue: 0, // 最终的动画值
+      duration: 300,
+      useNativeDriver: false,
+    },
+  ))
+  // 直接隐藏
+  const toofastHide = useRef(Animated.timing(
+    // timing方法使动画值随时间变化
+    opacityControl.current, // 要变化的动画值
+    {
+      toValue: 0, // 最终的动画值
+      duration: 0,
+      useNativeDriver: false,
+    },
+  ))
 
   useImperativeHandle(props.refInstance, () => ({
     switchFullScreen: switchFullScreen,
@@ -34,7 +66,6 @@ const VideoPlayerView = (props) => {
         poster: props.poster,
         videoTitle: props.videoTitle,
         isPaused: !props.autoPlay,
-        isFullScreen: props.isFullScreen,
         muted: props.muted,
         showPoster: _showPoster,
         showVideo: !_showPoster,
@@ -70,9 +101,9 @@ const VideoPlayerView = (props) => {
   }, [props.videoUrl])
 
   useEffect(useCallback(() => {
+    console.log('muted:', props.muted, muted, 'isModal:', props.isModal)
     // 静音判断
     if (props.muted !== muted) {
-      console.log('muted:', props.muted, muted)
       dispatch({
         type: 'setState',
         payload: {
@@ -166,17 +197,22 @@ const VideoPlayerView = (props) => {
   }
   // 显示控制栏
   const _showControl = () => {
-    console.log('_showControl');
+    console.log('_showControl:', showControl, 'isModal:', props.isModal);
     if (!isLoad) {
       // 视频没有初始化的时候，禁止显示控制栏
       return
     }
-    dispatch({
-      type: 'setState',
-      payload: {
-        // showPlayBtn: !showPlayBtn,
-      },
-    })
+    if (!showControl) {
+      dispatch({
+        type: 'setState',
+        payload: {
+          showControl: true,
+        },
+      })
+      AnimatedOp.current.start()
+    } else {
+      fastHideConts()
+    }
   }
 
   const _onSeek = () => { }
@@ -259,13 +295,55 @@ const VideoPlayerView = (props) => {
           showPoster: false, // 正在播放不显示海报
           isPaused: _isPause_,
           showLoading: !_isPause_,
-          showVideo: true,
+          // showVideo: true,
           // isSuspended: false,
         },
       })
     }
 
     props.onPlay && props.onPlay(_isPause_)
+  }
+
+  const _onBackButton = () => {
+    console.log('_onBackButton')
+    if (props.isFullScreen) {
+      props.onModalFullScreen && props.onModalFullScreen(false)
+    } else {
+      if (showControl) {
+        props.onBackButton && props.onBackButton()
+      }
+    }
+  }
+  const _onTapSwitchButton = () => {
+    if (props.isFullScreen) {
+      props.onModalFullScreen && props.onModalFullScreen(false)
+    } else {
+      props.onFullScreen && props.onFullScreen(true)
+    }
+  }
+  // 快速隐藏控件
+  const fastHideConts = () => {
+    fastHide.current.start(() => {
+      dispatch({
+        type: 'setState',
+        payload: {
+          showControl: false,
+        },
+      })
+    })
+  }
+
+  const TitleView = () => {
+    let view: React.ReactNode = null
+    if (props.isFullScreen || (!props.isFullScreen && props.showMinTitle)) {
+      view = (
+        <Text
+          style={[lineStyles.videoTitle, { fontSize: props.isFullScreen ? 20 : 14 }]}
+          numberOfLines={1}
+        >{videoTitle}</Text>
+      )
+    }
+    return view
   }
 
   console.log('videoPlayer videoUrl:', videoUrl, 'showPoster:', showPoster, 'poster:', poster, 'showVideo:', showVideo)
@@ -343,28 +421,166 @@ const VideoPlayerView = (props) => {
           ) : null
         }
         {
-          showPlayBtn ? (
+          !isError && showPlayBtn ? (
             <TouchableOpacity
               activeOpacity={1}
               onPress={_onStartPlay}
               style={lineStyles.controlPlayBtn}
             >
-              <View style={lineStyles.playButton}>
-                <Image
-                  style={lineStyles.playButton}
-                  source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
-                />
-              </View>
+              <Image
+                style={lineStyles.playButton}
+                source={VideoImages.icon_control_play}
+              />
             </TouchableOpacity>
           ) : null
         }
-        <View style={{ position: 'absolute' }}>
-          <Text style={{ color: '#fff' }}>{videoTitle}</Text>
-        </View>
+        {
+          isError
+            ? (
+              <TouchableOpacity
+                activeOpacity={1}
+                style={lineStyles.controlPlayBtn}
+                onPress={_onBackButton}
+              >
+                <Text style={{ color: '#fff' }}>视频播放出错暂时无法播放</Text>
+              </TouchableOpacity>
+            )
+            : null
+        }
+        {
+          showControl ? (
+            <Animated.View style={{
+              opacity: opacityControl.current,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
+            }}>
+              <View style={lineStyles.controlPlayBtn}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  style={lineStyles.playButton}
+                  onPress={_onPlay}
+                >
+                  <Image
+                    style={lineStyles.playButton}
+                    source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View
+                style={[lineStyles.control, lineStyles.topControl, {
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  paddingTop: props.isFullScreen ? 30 : props.statusBarTrans ? statusBarHeight : 5,
+                  paddingBottom: 5,
+                  borderTopLeftRadius: props.videoBarRadius,
+                  borderTopRightRadius: props.videoBarRadius,
+                  zIndex: 1,
+                }]}
+              >
+                <BackView showBack={props.showBack} isFullScreen={props.isFullScreen} onBackButton={_onBackButton} />
+                <TitleView />
+              </View>
+              <View
+                style={[lineStyles.control, lineStyles.bottomControl, {
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  zIndex: 1,
+                  flexDirection: 'row',
+                  // paddingBottom: isFullScreen ? 50 : 0,
+                  // width: videoWidth,
+                  borderBottomRightRadius: props.videoBarRadius,
+                  borderBottomLeftRadius: props.videoBarRadius,
+                }]}
+              >
+                <View
+                  style={{ flex: 1, height: 50 }}
+                />
+                {
+                  props.showMuted
+                    ? (
+                      <TouchableOpacity
+                        activeOpacity={1}
+                        style={{
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: 50,
+                          paddingLeft: 10,
+                          paddingRight: 15,
+                        }}
+                        onPress={() => {
+                          let _muted_ = !muted
+                          dispatch({
+                            type: 'setState',
+                            payload: {
+                              muted: _muted_,
+                            },
+                          })
+                          props.onMuted && props.onMuted(_muted_)
+                        }}
+                      >
+                        <Image
+                          style={lineStyles.controlSwitchBtn}
+                          source={muted ? VideoImages.muted_off : VideoImages.muted_on}
+                        />
+                      </TouchableOpacity>
+                    )
+                    : null
+                }
+                {
+                  props.enableSwitchScreen
+                    ? (
+                      <TouchableOpacity
+                        activeOpacity={1}
+                        style={{
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: 50,
+                          paddingRight: 15,
+                        }}
+                        onPress={_onTapSwitchButton}
+                      >
+                        <Image
+                          style={lineStyles.controlSwitchBtn}
+                          source={!props.isFullScreen
+                            ? VideoImages.icon_control_shrink_screen
+                            : VideoImages.icon_control_full_screen}
+                        />
+                      </TouchableOpacity>
+                    )
+                    : null
+                }
+              </View>
+            </Animated.View>
+          ) : null
+        }
       </TouchableOpacity>
     </View>
   )
 }
+
+const BackView = memo((props: any) => {
+  return useMemo(() => {
+    if (!props.showBack && !props.isFullScreen) {
+      return null
+    }
+    return (
+      <TouchableOpacity
+        activeOpacity={1}
+        style={lineStyles.backButton}
+        onPress={props.onBackButton}
+      >
+        <Image
+          source={VideoImages.icon_back}
+          style={{ width: 26, height: 26 }}
+        />
+      </TouchableOpacity>
+    )
+  }, [])
+})
 
 const lineStyles = StyleSheet.create({
   videoStyles: {
@@ -385,6 +601,36 @@ const lineStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
+  },
+  control: {
+    alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
+  topControl: {
+    top: 0,
+    paddingHorizontal: 15,
+  },
+  bottomControl: {
+    bottom: 0,
+  },
+  backButton: {
+    width: 26,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoTitle: {
+    fontSize: 14,
+    color: 'white',
+    flex: 1,
+    marginHorizontal: 10,
+    lineHeight: 26,
+  },
+  controlSwitchBtn: {
+    width: 25,
+    height: 25,
   },
 })
 
@@ -418,9 +664,8 @@ VideoPlayer.defaultProps = {
   rate: [1, 1.25, 1.5, 1.75, 2], // 视频播放的速率
   rateIndex: 0, // 播放速率
   isModal: false,
-  isFullScreen: false,
   showPoster: null,
-  showMuted: false, // 是否显示静音按钮
+  showMuted: true, // 是否显示静音按钮
   dotWdt: 14, // 圆点直径
   videoBarRadius: 0, // 圆角
 }

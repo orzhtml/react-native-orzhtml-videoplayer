@@ -18,7 +18,6 @@ const initialState = {
   duration: 0, // 视频的时长
   allTime: '', // 视频时长显示的值
   refreshVideo: false, // 是否刷新视频节点
-  isFullScreen: false, // 是否全屏
   isPaused: true, // 是否暂停，默认暂停
   isLoad: false, // 视频是否加载完成
   isSuspended: false, // 是否处于暂停状态
