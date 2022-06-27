@@ -3,6 +3,7 @@ import { defaultVideoHeight, screenWidth } from '../common/Utils'
 
 interface IProps {
   children: React.ReactNode;
+  init: any;
 }
 
 const initialState = {
@@ -47,7 +48,8 @@ function VPlayerReducer(state: any, action: { type: string; payload: object }) {
 export const VPlayerContext = createContext({})
 
 export const VPlayerProvider = (props: IProps) => {
-  const [state, dispatch] = useReducer(VPlayerReducer, initialState)
+  const [state, dispatch] = useReducer(VPlayerReducer, { ...initialState, ...props.init })
+
   return (
     <VPlayerContext.Provider value={{ state, dispatch }}>
       {props.children}

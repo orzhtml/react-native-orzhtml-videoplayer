@@ -1,47 +1,61 @@
-import React, { useState } from "react"
+import React, { useEffect, useRef, useMemo, memo } from "react"
 import { TouchableOpacity, View, Text } from "react-native"
 
 import { VideoModal } from '../libs/videoPlayer'
 
 const VideoCell = (props) => {
-  const { data, idx } = props
+  const { data, idx, isPaused, stopOtherPlayer } = props
+  const _videoModalRef = useRef<any>(null)
+  const _initRef = useRef(false)
 
-  return (
-    <View style={{
-      borderBottomWidth: 1,
-      borderBottomColor: 'red',
-      position: 'relative',
-    }}>
-      <VideoModal
-        statusBar={() => null}
-        videoStyles={[
-          idx === 0 ?
-          {
-            backgroundColor: 'yellow',
-          } : null
-        ]}
-        {...data}
-        autoPlay={!data.isPaused}
-      />
-      <TouchableOpacity
-        activeOpacity={1}
-        style={{
-          justifyContent: 'center',
-          padding: 10
-        }}
-        onPress={() => {
-          // goDetails && goDetails(data, this.progress)
-        }}
-      >
-        <Text style={{
-          fontSize: 21,
-          color: 'black',
-          lineHeight: 26,
-          textAlign: 'justify'
-        }}>{data.videoTitle}</Text>
-      </TouchableOpacity>
-    </View>
-  )
+  useEffect(() => {
+    if (isPaused && _initRef.current) {
+      _videoModalRef.current && _videoModalRef.current.onStopListPlay()
+    }
+    _initRef.current = true
+  }, [isPaused])
+
+  // 播放状态回调
+  const _onPlay = (isPaused) => {
+    if (!isPaused) {
+      stopOtherPlayer && stopOtherPlayer(data.newsId)
+    }
+  }
+
+  return useMemo(() => {
+    return (
+      <View style={{
+        borderBottomWidth: 1,
+        borderBottomColor: 'red',
+        position: 'relative',
+      }}>
+        <VideoModal
+          {...data}
+          ref={_videoModalRef}
+          statusBar={() => null}
+          autoPlay={!data.isPaused}
+          onPlay={_onPlay}
+        />
+        <View
+          // activeOpacity={1}
+          style={{
+            justifyContent: 'center',
+            padding: 10
+          }}
+        // onPress={() => {
+        //   // goDetails && goDetails(data, this.progress)
+        // }}
+        >
+          <Text style={{
+            fontSize: 18,
+            color: 'black',
+            lineHeight: 26,
+            textAlign: 'justify'
+          }}>{data.videoTitle}</Text>
+        </View>
+      </View>
+    )
+  }, [data])
 }
 
 export default VideoCell
