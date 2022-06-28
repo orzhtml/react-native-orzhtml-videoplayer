@@ -10,6 +10,7 @@ import VideoImages from '../common/Images'
 import { VPlayerContext, VPlayerProvider } from "../models/vPlayer"
 
 import HeaderView from './Header'
+import Loading from './Loading'
 
 const VideoPlayerView = (props) => {
   const { state, dispatch } = useContext<any>(VPlayerContext)
@@ -619,26 +620,30 @@ const VideoPlayerView = (props) => {
                 <BackView showBack={props.showBack} isFullScreen={props.isFullScreen} onBackButton={_onBackButton} />
                 <TitleView isFullScreen={props.isFullScreen} showMinTitle={props.showMinTitle} videoTitle={props.videoTitle} />
               </View>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flex: 1,
-                }}
-                onPress={_showControl}
-              >
-                <TouchableOpacity
-                  activeOpacity={1}
-                  style={lineStyles.playButton}
-                  onPress={_onPlay}
-                >
-                  <Image
-                    style={lineStyles.playButton}
-                    source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
-                  />
-                </TouchableOpacity>
-              </TouchableOpacity>
+              {
+                !showLoading ? (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 1,
+                    }}
+                    onPress={_showControl}
+                  >
+                    <TouchableOpacity
+                      activeOpacity={1}
+                      style={lineStyles.playButton}
+                      onPress={_onPlay}
+                    >
+                      <Image
+                        style={lineStyles.playButton}
+                        source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
+                      />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                ) : null
+              }
               <View
                 style={{
                   alignItems: 'center',
@@ -707,6 +712,7 @@ const VideoPlayerView = (props) => {
             </Animated.View>
           ) : null
         }
+        <Loading showLoading={showLoading} videoHeight={videoHeight} videoWidth={videoWidth} />
       </View>
     </>
   )

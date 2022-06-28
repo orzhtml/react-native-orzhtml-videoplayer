@@ -83,30 +83,26 @@ const VideoModal = (props) => {
         ref={videoPlayerRef}
         onFullScreen={onFullScreen}
       />
-      {
-        isModalVisible ? (
-          <Modal
-            style={{ margin: 0 }}
-            isVisible={isModalVisible}
-            statusBarTranslucent={true}
-            animationInTiming={10}
-            animationOutTiming={10}
-            backdropOpacity={0}
-          >
-            <VideoPlayer
-              {...props}
-              ref={_videoModalRef}
-              isFullScreen={true}
-              statusBar={() => <StatusBar hidden={true} translucent={true} />}
-              isModal={true}
-              autoPlay={false}
-              onModalFullScreen={onModalFullScreen}
-              onLoadStart={onModalLoad}
-              showPoster={false}
-            />
-          </Modal>
-        ) : null
-      }
+      <Modal
+        style={{ margin: 0 }}
+        isVisible={isModalVisible}
+        statusBarTranslucent={true}
+        animationInTiming={10}
+        animationOutTiming={10}
+        backdropOpacity={0}
+      >
+        <VideoPlayer
+          {...props}
+          ref={_videoModalRef}
+          isFullScreen={true}
+          statusBar={() => <StatusBar hidden={true} translucent={true} />}
+          isModal={true}
+          autoPlay={false}
+          onModalFullScreen={onModalFullScreen}
+          onLoadStart={onModalLoad}
+          showPoster={false}
+        />
+      </Modal>
     </>
   )
 }
