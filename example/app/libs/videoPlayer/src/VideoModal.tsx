@@ -101,6 +101,7 @@ const VideoModal = (props) => {
           onModalFullScreen={onModalFullScreen}
           onLoadStart={onModalLoad}
           showPoster={false}
+          videoBarRadius={0}
         />
       </Modal>
     </>

@@ -40,15 +40,15 @@ const VideoCell = (props) => {
           videoBarRadius={10}
           videoMaxWidth={screenWidth - 20}
         />
-        <View
-          // activeOpacity={1}
+        <TouchableOpacity
+          activeOpacity={1}
           style={{
             justifyContent: 'center',
             paddingVertical: 10
           }}
-        // onPress={() => {
-        //   // goDetails && goDetails(data, this.progress)
-        // }}
+          onPress={() => {
+            // goDetails && goDetails(data, this.progress)
+          }}
         >
           <Text style={{
             fontSize: 18,
@@ -56,7 +56,7 @@ const VideoCell = (props) => {
             lineHeight: 26,
             textAlign: 'justify'
           }}>{data.videoTitle}</Text>
-        </View>
+        </TouchableOpacity>
       </View>
     )
   }, [data])

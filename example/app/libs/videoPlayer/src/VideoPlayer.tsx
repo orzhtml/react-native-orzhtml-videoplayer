@@ -1,5 +1,5 @@
-import React, { forwardRef, useRef, useState, useImperativeHandle, useEffect, useCallback, useContext, useMemo, memo } from "react"
-import { StyleSheet, View, Animated, Easing, Text, TouchableOpacity, BackHandler, Image } from "react-native"
+import React, { forwardRef, useRef, useImperativeHandle, useEffect, useCallback, useContext, useMemo, memo } from "react"
+import { View, Animated, Easing, Text, TouchableOpacity, BackHandler, Image } from "react-native"
 import Video from 'react-native-video'
 
 import {
@@ -11,6 +11,7 @@ import { VPlayerContext, VPlayerProvider } from "../models/vPlayer"
 
 import HeaderView from './Header'
 import Loading from './Loading'
+import { lineStyles } from './styles'
 
 const VideoPlayerView = (props) => {
   const { state, dispatch } = useContext<any>(VPlayerContext)
@@ -490,6 +491,8 @@ const VideoPlayerView = (props) => {
     'isSuspended:', isSuspended, 'showPoster:', showPoster
   )
 
+  console.log('props.videoBarRadius:', props.videoBarRadius);
+
   return (
     <>
       <HeaderView
@@ -511,6 +514,7 @@ const VideoPlayerView = (props) => {
                 rotate: rotate,
               },
             ],
+            borderRadius: props.videoBarRadius,
           },
         ]}
       >
@@ -544,6 +548,7 @@ const VideoPlayerView = (props) => {
                 onError={_onError} // 播放失败后的回调
                 onReadyForDisplay={_onReadyForDisplay}
                 style={[lineStyles.videoStyles, props.videoStyles, {
+                  borderRadius: props.videoBarRadius,
                   width: videoWidth,
                   height: videoHeight
                 }]}
@@ -554,7 +559,7 @@ const VideoPlayerView = (props) => {
         {
           // 显示封面
           (showPoster && poster !== null) ? (
-            <View style={[lineStyles.videoStyles, { flex: 1 }]}>
+            <View style={[lineStyles.videoStyles, { borderRadius: props.videoBarRadius, overflow: 'hidden', flex: 1 }]}>
               <Image
                 source={{ uri: poster }}
                 style={{
@@ -751,45 +756,6 @@ const TitleView = memo((props: any) => {
     }
     return view
   }, [props.videoTitle])
-})
-
-const lineStyles = StyleSheet.create({
-  videoStyles: {
-    backgroundColor: '#000',
-    position: 'relative',
-  },
-  playButton: {
-    width: 60,
-    height: 60,
-  },
-  controlPlayBtn: {
-    position: 'absolute',
-    bottom: 0,
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  backButton: {
-    width: 26,
-    height: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  videoTitle: {
-    fontSize: 14,
-    color: 'white',
-    flex: 1,
-    marginHorizontal: 10,
-    lineHeight: 26,
-  },
-  controlSwitchBtn: {
-    width: 25,
-    height: 25,
-  },
 })
 
 const VideoPlayer = (props) => {
