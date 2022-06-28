@@ -38,8 +38,4 @@ export function isClickGesture(x, y) {
   return x === 0 && y === 0
 }
 
-export function getCnLength(str) {
-  return str.replace(/[^\\x00-\\xff]/g, '**').length
-}
-
 export const isIOS = Platform.OS === 'ios'

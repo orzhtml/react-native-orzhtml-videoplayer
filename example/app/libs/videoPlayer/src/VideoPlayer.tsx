@@ -491,8 +491,6 @@ const VideoPlayerView = (props) => {
     'isSuspended:', isSuspended, 'showPoster:', showPoster
   )
 
-  console.log('props.videoBarRadius:', props.videoBarRadius);
-
   return (
     <>
       <HeaderView
@@ -559,10 +557,11 @@ const VideoPlayerView = (props) => {
         {
           // 显示封面
           (showPoster && poster !== null) ? (
-            <View style={[lineStyles.videoStyles, { borderRadius: props.videoBarRadius, overflow: 'hidden', flex: 1 }]}>
+            <View style={[lineStyles.videoStyles, props.videoStyles, { borderRadius: props.videoBarRadius }]}>
               <Image
                 source={{ uri: poster }}
                 style={{
+                  borderRadius: props.videoBarRadius,
                   width: videoWidth,
                   height: videoHeight,
                 }}
@@ -600,27 +599,17 @@ const VideoPlayerView = (props) => {
         {
           showControl ? (
             <Animated.View
-              style={{
+              style={[lineStyles.positionBar, {
                 opacity: opacityControl.current,
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
                 zIndex: 2,
-              }}
+              }]}
             >
               <View
-                style={{
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(0,0,0,0.4)',
+                style={[lineStyles.headerBarStyle, {
                   borderTopLeftRadius: props.videoBarRadius,
                   borderTopRightRadius: props.videoBarRadius,
-                  paddingHorizontal: 15,
-                  flexDirection: 'row',
                   paddingTop: props.isFullScreen ? 30 : props.statusBarTrans ? statusBarHeight + 10 : 10,
-                  paddingBottom: 10,
-                }}
+                }, props.headerBarStyle]}
               >
                 <BackView showBack={props.showBack} isFullScreen={props.isFullScreen} onBackButton={_onBackButton} />
                 <TitleView isFullScreen={props.isFullScreen} showMinTitle={props.showMinTitle} videoTitle={props.videoTitle} />
@@ -629,11 +618,7 @@ const VideoPlayerView = (props) => {
                 !showLoading ? (
                   <TouchableOpacity
                     activeOpacity={1}
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flex: 1,
-                    }}
+                    style={[lineStyles.gFlexCenter, { flex: 1 }]}
                     onPress={_showControl}
                   >
                     <TouchableOpacity
@@ -650,13 +635,11 @@ const VideoPlayerView = (props) => {
                 ) : null
               }
               <View
-                style={{
-                  alignItems: 'center',
+                style={[lineStyles.gFlexCenter, {
                   backgroundColor: 'rgba(0,0,0,0.4)',
                   borderBottomRightRadius: props.videoBarRadius,
                   borderBottomLeftRadius: props.videoBarRadius,
-                  flexDirection: 'row',
-                }}
+                }, props.footerBarStyle]}
               >
                 <View style={{ flex: 1, height: 50 }} />
                 {
@@ -664,13 +647,7 @@ const VideoPlayerView = (props) => {
                     ? (
                       <TouchableOpacity
                         activeOpacity={1}
-                        style={{
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: 50,
-                          paddingLeft: 10,
-                          paddingRight: 15,
-                        }}
+                        style={lineStyles.mutedBar}
                         onPress={() => {
                           let _muted_ = !muted
                           dispatch({
@@ -695,12 +672,7 @@ const VideoPlayerView = (props) => {
                     ? (
                       <TouchableOpacity
                         activeOpacity={1}
-                        style={{
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: 50,
-                          paddingRight: 15,
-                        }}
+                        style={lineStyles.screenBar}
                         onPress={_onTapSwitchButton}
                       >
                         <Image
@@ -796,7 +768,7 @@ VideoPlayer.defaultProps = {
   playWhenInactive: true, // 在通知或控制中心位于视频前面时是否应继续播放媒体
   showMinTitle: false, // 是否显示小视频标题
   videoMaxWidth: 0, // 默认小屏视频最大宽度
-  rate: [1, 1.25, 1.5, 1.75, 2], // 视频播放的速率
+  rate: [1, 1.5, 2, 3], // 视频播放的速率
   rateIndex: 0, // 播放速率
   isModal: false,
   showPoster: null,
