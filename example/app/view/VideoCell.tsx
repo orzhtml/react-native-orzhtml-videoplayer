@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useMemo, memo } from "react"
 import { TouchableOpacity, View, Text } from "react-native"
 
 import { VideoModal } from '../libs/videoPlayer'
+import { screenWidth } from "../common/Utils"
 
 const VideoCell = (props) => {
   const { data, idx, isPaused, stopOtherPlayer } = props
@@ -28,6 +29,7 @@ const VideoCell = (props) => {
         borderBottomWidth: 1,
         borderBottomColor: 'red',
         position: 'relative',
+        paddingHorizontal: 10,
       }}>
         <VideoModal
           {...data}
@@ -35,12 +37,14 @@ const VideoCell = (props) => {
           statusBar={() => null}
           autoPlay={!data.isPaused}
           onPlay={_onPlay}
+          videoBarRadius={10}
+          videoMaxWidth={screenWidth - 20}
         />
         <View
           // activeOpacity={1}
           style={{
             justifyContent: 'center',
-            padding: 10
+            paddingVertical: 10
           }}
         // onPress={() => {
         //   // goDetails && goDetails(data, this.progress)

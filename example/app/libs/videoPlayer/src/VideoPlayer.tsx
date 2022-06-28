@@ -24,6 +24,16 @@ const VideoPlayerView = (props) => {
   const opacityControl = useRef(new Animated.Value(0))
   const nowCurrentTime = useRef(0) // 当前播放秒数
   const nowBufferX = useRef(0) // 当前缓存秒速
+  const TimeHideConts = useRef<any>(null)
+  const nowTime = useRef('00:00')
+  const dotX = useRef(new Animated.Value(0))
+  const bufferX = useRef(new Animated.Value(0))
+  const playDotX = useRef<any>(null) // 控件没被隐藏时的进度动画
+  const playBufferX = useRef<any>(null) // 缓存进度
+  const isMoveDot = useRef(false)
+  const touchX = useRef(0)
+  const dotSpeed = useRef<any>(null)
+  const paddingX = useRef(0) // 边距的值
   // 控件显示动画
   const AnimatedOp = useRef(Animated.timing(
     // timing方法使动画值随时间变化
@@ -63,9 +73,7 @@ const VideoPlayerView = (props) => {
   }))
 
   useEffect(() => {
-    if (props.isFullScreen) {
-      _setVideoLayout(props.isFullScreen)
-    }
+    _setVideoLayout(props.isFullScreen)
     if (!isIOS) {
       BackHandler.addEventListener('hardwareBackPress', _onBackPress)
     }
@@ -74,7 +82,7 @@ const VideoPlayerView = (props) => {
       if (!isIOS) {
         BackHandler.removeEventListener('hardwareBackPress', _onBackPress)
       }
-      // clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
+      clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
     }
   }, [])
 
@@ -128,6 +136,7 @@ const VideoPlayerView = (props) => {
         isPaused: true,
         showControl: false,
         showLoading: false,
+        isSuspended: true,
         ...opts,
       },
     })
@@ -155,13 +164,15 @@ const VideoPlayerView = (props) => {
       type: 'setState',
       payload: {
         ..._data,
-        showPlayBtn: false
+        showPoster: false,
+        showPlayBtn: false,
+        showVideo: true
       },
     })
 
     _videoRef.current?.seek(seekTime)
-    // nowTime.current = formatTime(seekTime)
-    // animatedChange(seekTime, buffer)
+    nowTime.current = formatTime(seekTime)
+    _animatedChange(seekTime, buffer)
   }
   // 安卓返回按钮
   const _onBackPress = () => {
@@ -183,7 +194,10 @@ const VideoPlayerView = (props) => {
         _width = props.videoMaxWidth
         _height = _width * 9 / 16
       }
+
+      paddingX.current = (screenWidth - _width) / 2 // 边距的值
     }
+
     dispatch({
       type: 'setState',
       payload: {
@@ -196,12 +210,10 @@ const VideoPlayerView = (props) => {
   }
   // 显示控制栏
   const _showControl = () => {
-    console.log('_showControl:', showControl, 'isModal:', props.isModal, 'isLoad:', isLoad);
     if (!isLoad) {
       // 视频没有初始化的时候，禁止显示控制栏
       return
     }
-    console.log('_showControl 2:', showControl, 'isModal:', props.isModal, 'isLoad:', isLoad);
     if (!showControl) {
       dispatch({
         type: 'setState',
@@ -210,7 +222,9 @@ const VideoPlayerView = (props) => {
         },
       })
       AnimatedOp.current.start()
+      _activateAutoHide()
     } else {
+      // 快速隐藏控件
       toofastHide.current.start(() => {
         dispatch({
           type: 'setState',
@@ -219,14 +233,74 @@ const VideoPlayerView = (props) => {
           },
         })
       })
-      // fastHideConts()
     }
   }
+  // 隐藏控件
+  const _fastHideConts = () => {
+    fastHide.current.start(() => {
+      dispatch({
+        type: 'setState',
+        payload: {
+          showControl: false,
+        },
+      })
+    })
+  }
+  // 激活自动隐藏
+  const _activateAutoHide = () => {
+    clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
+    TimeHideConts.current = setTimeout(_fastHideConts, 5000)
+  }
 
-  const _onSeek = () => { }
+  const _animatedChange = (seekTime, buffer) => {
+    Animated.timing(
+      // timing方法使动画值随时间变化
+      dotX.current, // 要变化的动画值
+      {
+        toValue: seekTime, // 最终的动画值
+        duration: 0,
+        useNativeDriver: false,
+      },
+    ).start() // 开始执行动画
 
-  const _onEnd = () => { }
+    Animated.timing(
+      // timing方法使动画值随时间变化
+      bufferX.current, // 要变化的动画值
+      {
+        toValue: buffer, // 最终的动画值
+        duration: 0,
+        useNativeDriver: false,
+      },
+    ).start()
+  }
 
+  const _onSeek = (e) => {
+    console.log('_onSeek e:', e)
+    props.onSeek && props.onSeek(e)
+    dispatch({
+      type: 'setState',
+      payload: {
+        isEnd: false,
+      },
+    })
+  }
+
+  const _onEnd = () => {
+    if (!props.repeat) {
+      dispatch({
+        type: 'setState',
+        payload: {
+          // showControl: true,
+          isPaused: true,
+          isEnd: true,
+        },
+      })
+    }
+    if (!isPaused) {
+      props.onEnd && props.onEnd()
+    }
+  }
+  // 播放进度  包含进度条  以及当前播放时间
   const _onProgress = (e) => {
     props.onProgress && props.onProgress(e)
 
@@ -250,8 +324,16 @@ const VideoPlayerView = (props) => {
       }
     }
 
-    nowCurrentTime.current = e.currentTime
-    nowBufferX.current = e.playableDuration
+    if (!isMoveDot.current) {
+      nowCurrentTime.current = e.currentTime
+      nowBufferX.current = e.playableDuration
+    }
+
+    nowTime.current = formatTime(e.currentTime)
+
+    if (!isMoveDot.current) {
+      dotSpeed.current && dotSpeed.current.setSpeed(e)
+    }
 
   }
 
@@ -266,9 +348,9 @@ const VideoPlayerView = (props) => {
     })
   }
 
-  const _onLoadStart = (e) => {
-    console.log('_onLoadStart e:', e)
-    props.onLoadStart && props.onLoadStart(e)
+  const _onLoadStart = () => {
+    console.log('_onLoadStart')
+    props.onLoadStart && props.onLoadStart()
     dispatch({
       type: 'setState',
       payload: {
@@ -304,11 +386,11 @@ const VideoPlayerView = (props) => {
     })
   }
 
-  const _onReadyForDisplay = (e) => {
-    console.log('_onReadyForDisplay e:', e)
-    props.onReadyForDisplay && props.onReadyForDisplay(e)
+  const _onReadyForDisplay = () => {
+    console.log('_onReadyForDisplay')
+    props.onReadyForDisplay && props.onReadyForDisplay()
   }
-
+  // 播放视频
   const _onStartPlay = () => {
     dispatch({
       type: 'setState',
@@ -322,15 +404,15 @@ const VideoPlayerView = (props) => {
     })
     props.onPlay && props.onPlay(false)
   }
-
+  // 继续播放视频
   const _onPlay = async () => {
     const _isPause_ = !isPaused
     console.log('_onPlay isEnd:', isEnd, '_isPause_', _isPause_, 'isSuspended:', isSuspended)
     if (isEnd) {
       // 已经播放结束，重新开始播放
-      _videoRef.current.seek(0)
-      // nowTime.current = '00:00'
-      // animatedChange(0, 0)
+      _videoRef.current?.seek(0)
+      nowTime.current = '00:00'
+      _animatedChange(0, 0)
       await dispatch({
         type: 'setState',
         payload: {
@@ -341,20 +423,27 @@ const VideoPlayerView = (props) => {
         },
       })
     } else {
-      console.log('处于暂停状态，还原播放进度')
-      // _videoRef.current.seek(nowCurrentTime.current)
-      // nowTime.current = formatTime(nowCurrentTime.current)
-      // animatedChange(nowCurrentTime.current, nowBufferX.current)
       await dispatch({
         type: 'setState',
         payload: {
           showPoster: false, // 正在播放不显示海报
           isPaused: _isPause_,
           showLoading: !_isPause_,
-          // showVideo: true,
-          // isSuspended: false,
         },
       })
+      if (isSuspended) {
+        console.log('处于暂停状态，还原播放进度')
+        _videoRef.current?.seek(nowCurrentTime.current)
+        nowTime.current = formatTime(nowCurrentTime.current)
+        _animatedChange(nowCurrentTime.current, nowBufferX.current)
+
+        await dispatch({
+          type: 'setState',
+          payload: {
+            isSuspended: false,
+          },
+        })
+      }
     }
 
     props.onPlay && props.onPlay(_isPause_)
@@ -393,22 +482,15 @@ const VideoPlayerView = (props) => {
       })
     }
   }
-  // 快速隐藏控件
-  const _fastHideConts = () => {
-    fastHide.current.start(() => {
-      dispatch({
-        type: 'setState',
-        payload: {
-          showControl: false,
-        },
-      })
-    })
-  }
 
-  console.log('videoPlayer videoTitle:', videoTitle, 'showPoster:', showPoster, 'showVideo:', showVideo, 'muted:', props.muted, 'isPaused:', isPaused)
+  console.log(
+    'videoPlayer videoTitle:', videoTitle, 'isModal:', props.isModal,
+    'showVideo:', showVideo, 'isPaused:', isPaused,
+    'isSuspended:', isSuspended, 'showPoster:', showPoster
+  )
 
   return (
-    <View style={{ position: 'relative' }}>
+    <>
       <HeaderView
         statusBar={props.statusBar}
         statusBarBg={props.statusBarBg}
@@ -427,13 +509,16 @@ const VideoPlayerView = (props) => {
               {
                 rotate: rotate,
               },
-            ]
+            ],
           },
         ]}
       >
         {
           showVideo && videoUrl ? (
-            <TouchableOpacity activeOpacity={1} onPress={_showControl}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={_showControl}
+            >
               <Video
                 ref={_videoRef}
                 source={{ uri: videoUrl }}
@@ -508,15 +593,17 @@ const VideoPlayerView = (props) => {
         }
         {
           showControl ? (
-            <Animated.View style={{
-              opacity: opacityControl.current,
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 1,
-            }}>
+            <Animated.View
+              style={{
+                opacity: opacityControl.current,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 2,
+              }}
+            >
               <View
                 style={{
                   alignItems: 'center',
@@ -525,7 +612,6 @@ const VideoPlayerView = (props) => {
                   borderTopRightRadius: props.videoBarRadius,
                   paddingHorizontal: 15,
                   flexDirection: 'row',
-                  // height: props.isFullScreen ? 66 : props.statusBarTrans ? statusBarHeight + 46 : 46,
                   paddingTop: props.isFullScreen ? 30 : props.statusBarTrans ? statusBarHeight + 10 : 10,
                   paddingBottom: 10,
                 }}
@@ -622,7 +708,7 @@ const VideoPlayerView = (props) => {
           ) : null
         }
       </View>
-    </View>
+    </>
   )
 }
 
@@ -681,19 +767,6 @@ const lineStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
-  control: {
-    alignItems: 'center',
-    // position: 'absolute',
-    // left: 0,
-    // right: 0,
-  },
-  topControl: {
-    // top: 0,
-    paddingHorizontal: 15,
-  },
-  bottomControl: {
-    bottom: 0,
-  },
   backButton: {
     width: 26,
     height: 26,
@@ -724,6 +797,7 @@ const VideoPlayer = (props) => {
     showPoster: _showPoster,
     showVideo: !_showPoster,
   }
+
   return (
     <VPlayerProvider init={init}>
       <VideoPlayerView {...props} />

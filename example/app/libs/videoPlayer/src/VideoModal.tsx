@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react"
-import { StatusBar } from "react-native"
+import { StatusBar, View } from "react-native"
 import Modal from 'react-native-modal'
 
 import VideoPlayer from './VideoPlayer'
@@ -53,7 +53,6 @@ const VideoModal = (props) => {
       seekTime: Math.max(0, seekTime.current - 1),
       buffer: buffer.current,
       paused: paused.current,
-      showPoster: false
     })
   }
 
@@ -84,26 +83,30 @@ const VideoModal = (props) => {
         ref={videoPlayerRef}
         onFullScreen={onFullScreen}
       />
-      <Modal
-        style={{ margin: 0 }}
-        isVisible={isModalVisible}
-        statusBarTranslucent={true}
-        animationInTiming={10}
-        animationOutTiming={10}
-        backdropOpacity={0}
-      >
-        <VideoPlayer
-          {...props}
-          ref={_videoModalRef}
-          isFullScreen={true}
-          statusBar={() => <StatusBar hidden={true} translucent={true} />}
-          isModal={true}
-          autoPlay={false}
-          onModalFullScreen={onModalFullScreen}
-          onLoadStart={onModalLoad}
-          showPoster={false}
-        />
-      </Modal>
+      {
+        isModalVisible ? (
+          <Modal
+            style={{ margin: 0 }}
+            isVisible={isModalVisible}
+            statusBarTranslucent={true}
+            animationInTiming={10}
+            animationOutTiming={10}
+            backdropOpacity={0}
+          >
+            <VideoPlayer
+              {...props}
+              ref={_videoModalRef}
+              isFullScreen={true}
+              statusBar={() => <StatusBar hidden={true} translucent={true} />}
+              isModal={true}
+              autoPlay={false}
+              onModalFullScreen={onModalFullScreen}
+              onLoadStart={onModalLoad}
+              showPoster={false}
+            />
+          </Modal>
+        ) : null
+      }
     </>
   )
 }
