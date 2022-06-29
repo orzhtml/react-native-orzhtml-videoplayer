@@ -13,7 +13,6 @@ import MultiSlider from '../libs/speed/MultiSlider';
 import { lineStyles } from './styles'
 import HeaderView from './Header'
 import Loading from './Loading'
-// import Speed from './Speed'
 
 const VideoPlayerView = (props) => {
   const { state, dispatch } = useContext<any>(VPlayerContext)
