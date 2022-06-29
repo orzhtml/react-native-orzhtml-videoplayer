@@ -50,6 +50,11 @@ const VideoDetails = (props: any) => {
       }}>
         <Text>横屏</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => {
+        navigation.goBack()
+      }}>
+        <Text>返回</Text>
+      </TouchableOpacity>
       <ScrollView>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>
         <Text>这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件这是可全屏的播放组件</Text>

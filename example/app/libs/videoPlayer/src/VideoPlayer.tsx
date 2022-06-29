@@ -1,17 +1,19 @@
 import React, { forwardRef, useRef, useImperativeHandle, useEffect, useCallback, useContext, useMemo, memo } from "react"
-import { View, Animated, Easing, Text, TouchableOpacity, BackHandler, Image } from "react-native"
+import { View, Animated, Text, TouchableOpacity, BackHandler, Image, PanResponder } from "react-native"
 import Video from 'react-native-video'
 
 import {
-  defaultVideoHeight, formatTime, isIOS,
+  defaultVideoHeight, formatTime, isClickGesture, isHorizontalGesture, isIOS,
   screenHeight, screenWidth, statusBarHeight,
 } from '../common/Utils'
 import VideoImages from '../common/Images'
 import { VPlayerContext, VPlayerProvider } from "../models/vPlayer"
+import MultiSlider from '../libs/speed/MultiSlider';
 
+import { lineStyles } from './styles'
 import HeaderView from './Header'
 import Loading from './Loading'
-import { lineStyles } from './styles'
+// import Speed from './Speed'
 
 const VideoPlayerView = (props) => {
   const { state, dispatch } = useContext<any>(VPlayerContext)
@@ -21,13 +23,14 @@ const VideoPlayerView = (props) => {
     videoTitle, rateIndex, isLoad, isError, showLoading,
     showVideo, showPlayBtn, duration, allTime, isEnd,
     isSuspended, showControl, muted,
+    sliderValue, nowTime, sliderLength
   } = state
+  const { navigation } = props
   const _videoRef = useRef<Video>(null)
   const opacityControl = useRef(new Animated.Value(0))
-  const nowCurrentTime = useRef(0) // 当前播放秒数
-  const nowBufferX = useRef(0) // 当前缓存秒速
+  const nowCurrentTime = useRef<number>(0) // 当前播放秒数
+  const nowBufferX = useRef<number>(0) // 当前缓存秒速
   const TimeHideConts = useRef<any>(null)
-  const nowTime = useRef('00:00')
   const dotX = useRef(new Animated.Value(0))
   const bufferX = useRef(new Animated.Value(0))
   const playDotX = useRef<any>(null) // 控件没被隐藏时的进度动画
@@ -36,6 +39,12 @@ const VideoPlayerView = (props) => {
   const touchX = useRef(0)
   const dotSpeed = useRef<any>(null)
   const paddingX = useRef(0) // 边距的值
+  const realMarginLeft = useRef(0)
+  // 进度条长度
+  const progressBarLength = useRef({
+    x: 0,
+    width: videoWidth - 200,
+  })
   // 控件显示动画
   const AnimatedOp = useRef(Animated.timing(
     // timing方法使动画值随时间变化
@@ -66,6 +75,90 @@ const VideoPlayerView = (props) => {
       useNativeDriver: false,
     },
   ))
+
+  // 上下滑动 调节音量 以及屏幕亮度
+  const _panResponder = PanResponder.create({
+    // 时机 ： 发生在手指刚触摸到屏幕的时候
+    /**
+       *  捕获询问
+          会从根元素一直询问到手指触碰到的元素(一般该元素不再有子元素)，如果在询问中途有元素获得了响应权，那么这次基于start的询问就结束了。
+       */
+    onStartShouldSetPanResponderCapture: (evt, gestureState) => {
+      console.log('_panResponder onStartShouldSetPanResponderCapture')
+      navigation && navigation.setParams({ enableGestures: false })
+      return false
+    },
+    /**
+       *  冒泡询问
+          若捕获询问阶段没有元素请求成为响应者，那么就从最内层的元素开始冒泡询问，这过程中有元素获得响应权，那么这次基于start的询问就结束了
+          而在start阶段获得响应者的元素在move阶段是作为询问的最内层元素。就像相当于在move询问阶段的范围可能会缩小。
+       */
+    onStartShouldSetPanResponder: (evt, gestureState) => {
+      console.log('_panResponder onStartShouldSetPanResponder')
+      navigation && navigation.setParams({ enableGestures: false })
+      if (isMoveDot.current) {
+        return false
+      }
+      // 如果是 0 则不处理
+      if (isClickGesture(gestureState.dx, gestureState.dy)) {
+        return false
+      }
+      // 如果是水平滑动，则处理
+      if (!isHorizontalGesture(gestureState.dx, gestureState.dy)) {
+        return true
+      }
+      return false
+    },
+    // 时机 ： 手指开始在屏幕移动的时候
+    /**
+       *  捕获询问
+          与start询问阶段一样，从根元素开始，一直询问是否需要获得手势权，不过这里询问的终点不再是触摸元素，而是由start产生的获权者。关键的事情说三变！！！
+       */
+    onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+      console.log('_panResponder onMoveShouldSetPanResponderCapture')
+      navigation && navigation.setParams({ enableGestures: false })
+      return false
+    },
+    // 冒泡询问 同start询问机制
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      console.log('_panResponder onMoveShouldSetPanResponder:', isMoveDot.current)
+      navigation && navigation.setParams({ enableGestures: false })
+      if (isMoveDot.current) {
+        return false
+      }
+      // 如果是 0 则不处理
+      if (isClickGesture(gestureState.dx, gestureState.dy)) {
+        return false
+      }
+      // 如果是水平滑动，则处理
+      if (!isHorizontalGesture(gestureState.dx, gestureState.dy)) {
+        return true
+      }
+      return false
+    },
+    onPanResponderGrant: (evt, gestureState) => {
+      console.log('_panResponder onPanResponderGrant')
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      console.log('_panResponder onPanResponderMove')
+      navigation && navigation.setParams({ enableGestures: false })
+    },
+    onPanResponderTerminationRequest: (evt, gestureState) => true,
+    onPanResponderRelease: (evt, gestureState) => {
+      console.log('_panResponder onPanResponderRelease')
+      if (!props.isFullScreen) {
+        navigation && navigation.setParams({ enableGestures: true })
+      }
+    },
+    onPanResponderTerminate: (evt, gestureState) => {
+      console.log('_panResponder onPanResponderTerminate')
+      return true
+    },
+    onShouldBlockNativeResponder: (evt, gestureState) => {
+      console.log('_panResponder onShouldBlockNativeResponder')
+      return false
+    },
+  })
 
   useImperativeHandle(props.refInstance, () => ({
     getCacheTime: getCacheTime,
@@ -168,13 +261,13 @@ const VideoPlayerView = (props) => {
         ..._data,
         showPoster: false,
         showPlayBtn: false,
-        showVideo: true
+        showVideo: true,
+        sliderValue: [seekTime],
+        nowTime: formatTime(seekTime)
       },
     })
 
     _videoRef.current?.seek(seekTime)
-    nowTime.current = formatTime(seekTime)
-    _animatedChange(seekTime, buffer)
   }
   // 安卓返回按钮
   const _onBackPress = () => {
@@ -250,30 +343,8 @@ const VideoPlayerView = (props) => {
   }
   // 激活自动隐藏
   const _activateAutoHide = () => {
-    clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
-    TimeHideConts.current = setTimeout(_fastHideConts, 5000)
-  }
-
-  const _animatedChange = (seekTime, buffer) => {
-    Animated.timing(
-      // timing方法使动画值随时间变化
-      dotX.current, // 要变化的动画值
-      {
-        toValue: seekTime, // 最终的动画值
-        duration: 0,
-        useNativeDriver: false,
-      },
-    ).start() // 开始执行动画
-
-    Animated.timing(
-      // timing方法使动画值随时间变化
-      bufferX.current, // 要变化的动画值
-      {
-        toValue: buffer, // 最终的动画值
-        duration: 0,
-        useNativeDriver: false,
-      },
-    ).start()
+    // clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
+    // TimeHideConts.current = setTimeout(_fastHideConts, 5000)
   }
 
   const _onSeek = (e) => {
@@ -331,12 +402,36 @@ const VideoPlayerView = (props) => {
       nowBufferX.current = e.playableDuration
     }
 
-    nowTime.current = formatTime(e.currentTime)
+    dispatch({
+      type: 'setState',
+      payload: {
+        nowTime: formatTime(e.currentTime),
+      },
+    })
 
     if (!isMoveDot.current) {
-      dotSpeed.current && dotSpeed.current.setSpeed(e)
+      dispatch({
+        type: 'setState',
+        payload: {
+          sliderValue: [nowCurrentTime.current],
+        },
+      })
     }
-
+  }
+  // 快进
+  const _onFastForward = (values) => {
+    console.log('onValuesChangeFinish values:', values)
+    nowCurrentTime.current = values[0]
+    _videoRef.current?.seek(values[0])
+    dispatch({
+      type: 'setState',
+      payload: {
+        sliderValue: values
+      },
+    })
+    isMoveDot.current = false
+    // _activateAutoHide() // 手指离开后激活自动隐藏
+    navigation && navigation.setParams({ enableGestures: true })
   }
 
   const _onBuffer = (e) => {
@@ -363,6 +458,18 @@ const VideoPlayerView = (props) => {
   // 视频加载
   const _onLoad = async (data) => {
     console.log('_onLoad:', data);
+    // 进度条动画
+    // playDotX.current = dotX.current.interpolate({
+    //   inputRange: [0, data.duration],
+    //   outputRange: [0, progressBarLength.current.width],
+    //   extrapolate: 'clamp',
+    // })
+    // // 缓存条
+    // playBufferX.current = bufferX.current.interpolate({
+    //   inputRange: [0, data.duration],
+    //   outputRange: [0, progressBarLength.current.width],
+    //   extrapolate: 'clamp',
+    // })
     await dispatch({
       type: 'setState',
       payload: {
@@ -413,8 +520,7 @@ const VideoPlayerView = (props) => {
     if (isEnd) {
       // 已经播放结束，重新开始播放
       _videoRef.current?.seek(0)
-      nowTime.current = '00:00'
-      _animatedChange(0, 0)
+
       await dispatch({
         type: 'setState',
         payload: {
@@ -422,6 +528,8 @@ const VideoPlayerView = (props) => {
           isPaused: false,
           isEnd: false,
           showLoading: !_isPause_,
+          sliderValue: [0],
+          nowTime: '00:00'
         },
       })
     } else {
@@ -436,13 +544,13 @@ const VideoPlayerView = (props) => {
       if (isSuspended) {
         console.log('处于暂停状态，还原播放进度')
         _videoRef.current?.seek(nowCurrentTime.current)
-        nowTime.current = formatTime(nowCurrentTime.current)
-        _animatedChange(nowCurrentTime.current, nowBufferX.current)
 
         await dispatch({
           type: 'setState',
           payload: {
             isSuspended: false,
+            sliderValue: [nowCurrentTime.current],
+            nowTime: formatTime(nowCurrentTime.current)
           },
         })
       }
@@ -485,14 +593,14 @@ const VideoPlayerView = (props) => {
     }
   }
 
-  console.log(
-    'videoPlayer videoTitle:', videoTitle, 'isModal:', props.isModal,
-    'showVideo:', showVideo, 'isPaused:', isPaused,
-    'isSuspended:', isSuspended, 'showPoster:', showPoster
-  )
+  // console.log(
+  //   'videoPlayer videoTitle:', videoTitle, 'isModal:', props.isModal,
+  //   'showVideo:', showVideo, 'isPaused:', isPaused,
+  //   'isSuspended:', isSuspended, 'showPoster:', showPoster
+  // )
 
   return (
-    <>
+    <View {..._panResponder.panHandlers}>
       <HeaderView
         statusBar={props.statusBar}
         statusBarBg={props.statusBarBg}
@@ -612,36 +720,95 @@ const VideoPlayerView = (props) => {
                 }, props.headerBarStyle]}
               >
                 <BackView showBack={props.showBack} isFullScreen={props.isFullScreen} onBackButton={_onBackButton} />
-                <TitleView isFullScreen={props.isFullScreen} showMinTitle={props.showMinTitle} videoTitle={props.videoTitle} />
+                <TitleView isFullScreen={props.isFullScreen} showMinTitle={props.showMinTitle} videoTitle={videoTitle} />
               </View>
-              {
-                !showLoading ? (
-                  <TouchableOpacity
-                    activeOpacity={1}
-                    style={[lineStyles.gFlexCenter, { flex: 1 }]}
-                    onPress={_showControl}
-                  >
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      style={lineStyles.playButton}
-                      onPress={_onPlay}
-                    >
-                      <Image
+              <TouchableOpacity
+                activeOpacity={1}
+                style={[lineStyles.gFlexCenter, { flex: 1 }]}
+                onPress={_showControl}
+              >
+                {
+                  !showLoading ? (
+                    <View style={[lineStyles.gFlexCenter, { flex: 1 }]}>
+                      <TouchableOpacity
+                        activeOpacity={1}
                         style={lineStyles.playButton}
-                        source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
-                      />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                ) : null
-              }
+                        onPress={_onPlay}
+                      >
+                        <Image
+                          style={lineStyles.playButton}
+                          source={isPaused ? VideoImages.icon_control_play : VideoImages.icon_control_pause}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : null
+                }
+              </TouchableOpacity>
               <View
-                style={[lineStyles.gFlexCenter, {
+                style={[{
+                  flexDirection: 'row',
                   backgroundColor: 'rgba(0,0,0,0.4)',
                   borderBottomRightRadius: props.videoBarRadius,
                   borderBottomLeftRadius: props.videoBarRadius,
                 }, props.footerBarStyle]}
               >
-                <View style={{ flex: 1, height: 50 }} />
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                    height: 50,
+                  }}
+                >
+                  <View style={{ marginLeft: 15, width: 55, justifyContent: 'center', alignItems: 'flex-start' }} >
+                    <Text style={{ color: '#ffffff' }}>
+                      {nowTime}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }} onLayout={(e) => {
+                    console.log('aaaaaa:', e.nativeEvent.layout)
+                    dispatch({
+                      type: 'setState',
+                      payload: {
+                        sliderLength: e.nativeEvent.layout.width,
+                      },
+                    })
+                  }}>
+                    <MultiSlider
+                      // vertical={true}
+                      // containerStyle={{
+                      //   marginTop: 200 - 30,
+                      //   marginLeft: 20,
+                      //   left: '-50%',
+                      // }}
+                      // trackStyle={{
+                      // height: 6,
+                      // marginTop: -2
+                      // }}
+                      // onValuesChange={(values) => {
+                      // console.log('onValuesChange values:', values)
+                      // }}
+                      values={sliderValue}
+                      min={0}
+                      max={duration}
+                      sliderLength={sliderLength}
+                      markerStyle={{ width: 14, height: 14 }}
+                      onValuesChangeFinish={_onFastForward}
+                      onValuesChangeStart={() => {
+                        console.log('onValuesChangeStart')
+                        isMoveDot.current = true
+                        clearTimeout(TimeHideConts.current)// 拖动进度条时禁止隐藏控件
+                        navigation && navigation.setParams({ enableGestures: false })
+                      }}
+                    />
+                  </View>
+                  <View style={{ width: 55, justifyContent: 'center', alignItems: 'flex-end' }} >
+                    <Text style={{ color: '#ffffff' }}>
+                      {allTime}
+                    </Text>
+                  </View>
+                </View>
                 {
                   props.showMuted
                     ? (
@@ -691,7 +858,7 @@ const VideoPlayerView = (props) => {
         }
         <Loading showLoading={showLoading} videoHeight={videoHeight} videoWidth={videoWidth} />
       </View>
-    </>
+    </View>
   )
 }
 

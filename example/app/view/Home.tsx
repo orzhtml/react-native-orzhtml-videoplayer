@@ -26,6 +26,14 @@ const Home = (props: any) => {
         >
           <Text style={styles.btnText}>视频详情页面</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            navigation.navigate('VideoSpeed')
+          }}
+        >
+          <Text style={styles.btnText}>播放器进度条</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   )

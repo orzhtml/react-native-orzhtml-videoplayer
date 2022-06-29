@@ -17,7 +17,8 @@ const initialState = {
   rateIndex: 0, // 播放速率
   muted: false, // 控制音频是否静音
   duration: 0, // 视频的时长
-  allTime: '', // 视频时长显示的值
+  allTime: '00:00', // 视频时长显示的值
+  nowTime: '00:00', // 时间
   refreshVideo: false, // 是否刷新视频节点
   isPaused: true, // 是否暂停，默认暂停
   isLoad: false, // 视频是否加载完成
@@ -29,6 +30,8 @@ const initialState = {
   showControl: false, // 是否显示控制栏
   showVideo: false, // 检查是否先显示封面，不显示封面则直接显示视频播放器
   showPlayBtn: true, // 默认显示播放按钮
+  sliderValue: [0], // 进度条点
+  sliderLength: 200, // 进度条默认长度
 }
 
 function VPlayerReducer(state: any, action: { type: string; payload: object }) {
