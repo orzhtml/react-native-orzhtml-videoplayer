@@ -23,7 +23,7 @@ const VideoPlayerView = (props) => {
     videoTitle, rateIndex, isLoad, isError, showLoading,
     showVideo, showPlayBtn, duration, allTime, isEnd,
     isSuspended, showControl, muted,
-    sliderValue, nowTime, sliderLength
+    sliderValue, nowTime, sliderLength, trackBuffer
   } = state
   const { navigation } = props
   const _videoRef = useRef<Video>(null)
@@ -31,20 +31,9 @@ const VideoPlayerView = (props) => {
   const nowCurrentTime = useRef<number>(0) // 当前播放秒数
   const nowBufferX = useRef<number>(0) // 当前缓存秒速
   const TimeHideConts = useRef<any>(null)
-  const dotX = useRef(new Animated.Value(0))
-  const bufferX = useRef(new Animated.Value(0))
-  const playDotX = useRef<any>(null) // 控件没被隐藏时的进度动画
-  const playBufferX = useRef<any>(null) // 缓存进度
   const isMoveDot = useRef(false)
-  const touchX = useRef(0)
-  const dotSpeed = useRef<any>(null)
   const paddingX = useRef(0) // 边距的值
-  const realMarginLeft = useRef(0)
-  // 进度条长度
-  const progressBarLength = useRef({
-    x: 0,
-    width: videoWidth - 200,
-  })
+
   // 控件显示动画
   const AnimatedOp = useRef(Animated.timing(
     // timing方法使动画值随时间变化
@@ -375,6 +364,7 @@ const VideoPlayerView = (props) => {
   }
   // 播放进度  包含进度条  以及当前播放时间
   const _onProgress = (e) => {
+    // console.log('progress:', e);
     props.onProgress && props.onProgress(e)
 
     if (e.currentTime === nowCurrentTime.current) {
@@ -400,6 +390,12 @@ const VideoPlayerView = (props) => {
     if (!isMoveDot.current) {
       nowCurrentTime.current = e.currentTime
       nowBufferX.current = e.playableDuration
+      dispatch({
+        type: 'setState',
+        payload: {
+          trackBuffer: nowBufferX.current,
+        },
+      })
     }
 
     dispatch({
@@ -458,18 +454,6 @@ const VideoPlayerView = (props) => {
   // 视频加载
   const _onLoad = async (data) => {
     console.log('_onLoad:', data);
-    // 进度条动画
-    // playDotX.current = dotX.current.interpolate({
-    //   inputRange: [0, data.duration],
-    //   outputRange: [0, progressBarLength.current.width],
-    //   extrapolate: 'clamp',
-    // })
-    // // 缓存条
-    // playBufferX.current = bufferX.current.interpolate({
-    //   inputRange: [0, data.duration],
-    //   outputRange: [0, progressBarLength.current.width],
-    //   extrapolate: 'clamp',
-    // })
     await dispatch({
       type: 'setState',
       payload: {
@@ -598,6 +582,8 @@ const VideoPlayerView = (props) => {
   //   'showVideo:', showVideo, 'isPaused:', isPaused,
   //   'isSuspended:', isSuspended, 'showPoster:', showPoster
   // )
+
+  // console.log('trackBuffer 1111:', trackBuffer);
 
   return (
     <View {..._panResponder.panHandlers}>
@@ -789,6 +775,7 @@ const VideoPlayerView = (props) => {
                       // onValuesChange={(values) => {
                       // console.log('onValuesChange values:', values)
                       // }}
+                      trackBuffer={trackBuffer}
                       values={sliderValue}
                       min={0}
                       max={duration}

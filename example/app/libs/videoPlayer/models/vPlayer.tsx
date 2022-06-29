@@ -17,6 +17,7 @@ const initialState = {
   rateIndex: 0, // 播放速率
   muted: false, // 控制音频是否静音
   duration: 0, // 视频的时长
+  trackBuffer: 0, // 视频缓存
   allTime: '00:00', // 视频时长显示的值
   nowTime: '00:00', // 时间
   refreshVideo: false, // 是否刷新视频节点
