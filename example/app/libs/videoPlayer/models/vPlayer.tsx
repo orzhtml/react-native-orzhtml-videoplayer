@@ -31,7 +31,7 @@ const initialState = {
   showControl: false, // 是否显示控制栏
   showVideo: false, // 检查是否先显示封面，不显示封面则直接显示视频播放器
   showPlayBtn: true, // 默认显示播放按钮
-  sliderValue: [0], // 进度条点
+  sliderValue: 0, // 进度条点
   sliderLength: 200, // 进度条默认长度
 }
 

@@ -18,20 +18,17 @@ export interface MarkerProps {
 }
 
 export interface LabelProps {
-    oneMarkerValue: string | number;
-    twoMarkerValue: string | number;
-    oneMarkerLeftPosition: number;
-    twoMarkerLeftPosition: number;
-    oneMarkerPressed: boolean;
-    twoMarkerPressed: boolean;
+    markerValue: string | number;
+    markerLeftPosition: number;
+    markerPressed: boolean;
 }
 
 export interface MultiSliderProps {
-    values?: number[];
+    values?: number;
 
-    onValuesChange?: (values: number[]) => void;
+    onValuesChange?: (values: number) => void;
     onValuesChangeStart?: () => void;
-    onValuesChangeFinish?: (values: number[]) => void;
+    onValuesChangeFinish?: (values: number) => void;
 
     sliderLength?: number;
     touchDimensions?: {
@@ -42,8 +39,6 @@ export interface MultiSliderProps {
     };
 
     customMarker?: React.ComponentType<MarkerProps>;
-    customMarkerLeft?: React.ComponentType<MarkerProps>;
-    customMarkerRight?: React.ComponentType<MarkerProps>;
     customLabel?: React.ComponentType<LabelProps>;
 
     isMarkersSeparated?: boolean;
@@ -56,6 +51,8 @@ export interface MultiSliderProps {
 
     containerStyle?: ViewStyle;
     trackStyle?: ViewStyle;
+    trackTwoStyle?: ViewStyle;
+    trackThreeStyle?: ViewStyle;
     selectedStyle?: ViewStyle;
     unselectedStyle?: ViewStyle;
     markerContainerStyle?: ViewStyle;
@@ -63,16 +60,12 @@ export interface MultiSliderProps {
     pressedMarkerStyle?: ViewStyle;
     valuePrefix?: string;
     valueSuffix?: string;
-    enabledOne?: boolean;
-    enabledTwo?: boolean;
-    onToggleOne?: () => void;
-    onToggleTwo?: () => void;
-    allowOverlap?: boolean;
+    enabled?: boolean;
+    onToggle?: () => void;
     snapped?: boolean;
     markerOffsetX?: number;
     markerOffsetY?: number;
     minMarkerOverlapDistance?: number;
-    imageBackgroundSource?: string;
     enableLabel?: boolean;
     vertical?: boolean;
 }

@@ -8,33 +8,33 @@ const width = 50;
 export default class DefaultLabel extends React.Component {
   static propTypes = {
 
-    oneMarkerValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    markerValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
-    oneMarkerPosition: PropTypes.number,
+    markerPosition: PropTypes.number,
 
-    oneMarkerPressed: PropTypes.bool,
+    markerPressed: PropTypes.bool,
   };
 
 
   render() {
     const {
-      oneMarkerValue,
-      oneMarkerPosition,
-      oneMarkerPressed,
+      markerValue,
+      markerPosition,
+      markerPressed,
     } = this.props;
 
     return (
       <View style={{ position: 'relative' }}>
-        {Number.isFinite(oneMarkerPosition) &&
-          Number.isFinite(oneMarkerValue) && (
+        {Number.isFinite(markerPosition) &&
+          Number.isFinite(markerValue) && (
             <View
               style={[
                 styles.sliderLabel,
-                { left: oneMarkerPosition - width / 2 + sliderRadius },
-                oneMarkerPressed && styles.markerPressed,
+                { left: markerPosition - width / 2 + sliderRadius },
+                markerPressed && styles.markerPressed,
               ]}
             >
-              <Text style={styles.sliderLabelText}>{oneMarkerValue}</Text>
+              <Text style={styles.sliderLabelText}>{markerValue}</Text>
             </View>
           )}
       </View>

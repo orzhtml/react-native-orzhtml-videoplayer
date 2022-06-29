@@ -251,7 +251,7 @@ const VideoPlayerView = (props) => {
         showPoster: false,
         showPlayBtn: false,
         showVideo: true,
-        sliderValue: [seekTime],
+        sliderValue: seekTime,
         nowTime: formatTime(seekTime)
       },
     })
@@ -332,8 +332,8 @@ const VideoPlayerView = (props) => {
   }
   // 激活自动隐藏
   const _activateAutoHide = () => {
-    // clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
-    // TimeHideConts.current = setTimeout(_fastHideConts, 5000)
+    clearTimeout(TimeHideConts.current) // 拖动进度条时禁止隐藏控件
+    TimeHideConts.current = setTimeout(_fastHideConts, 5000)
   }
 
   const _onSeek = (e) => {
@@ -409,16 +409,16 @@ const VideoPlayerView = (props) => {
       dispatch({
         type: 'setState',
         payload: {
-          sliderValue: [nowCurrentTime.current],
+          sliderValue: nowCurrentTime.current,
         },
       })
     }
   }
   // 快进
   const _onFastForward = (values) => {
-    console.log('onValuesChangeFinish values:', values)
-    nowCurrentTime.current = values[0]
-    _videoRef.current?.seek(values[0])
+    // console.log('onValuesChangeFinish values:', values)
+    nowCurrentTime.current = values
+    _videoRef.current?.seek(values)
     dispatch({
       type: 'setState',
       payload: {
@@ -426,7 +426,7 @@ const VideoPlayerView = (props) => {
       },
     })
     isMoveDot.current = false
-    // _activateAutoHide() // 手指离开后激活自动隐藏
+    _activateAutoHide() // 手指离开后激活自动隐藏
     navigation && navigation.setParams({ enableGestures: true })
   }
 
@@ -453,7 +453,7 @@ const VideoPlayerView = (props) => {
   }
   // 视频加载
   const _onLoad = async (data) => {
-    console.log('_onLoad:', data);
+    // console.log('_onLoad:', data);
     await dispatch({
       type: 'setState',
       payload: {
@@ -500,7 +500,7 @@ const VideoPlayerView = (props) => {
   // 继续播放视频
   const _onPlay = async () => {
     const _isPause_ = !isPaused
-    console.log('_onPlay isEnd:', isEnd, '_isPause_', _isPause_, 'isSuspended:', isSuspended)
+    // console.log('_onPlay isEnd:', isEnd, '_isPause_', _isPause_, 'isSuspended:', isSuspended)
     if (isEnd) {
       // 已经播放结束，重新开始播放
       _videoRef.current?.seek(0)
@@ -512,7 +512,7 @@ const VideoPlayerView = (props) => {
           isPaused: false,
           isEnd: false,
           showLoading: !_isPause_,
-          sliderValue: [0],
+          sliderValue: 0,
           nowTime: '00:00'
         },
       })
@@ -533,7 +533,7 @@ const VideoPlayerView = (props) => {
           type: 'setState',
           payload: {
             isSuspended: false,
-            sliderValue: [nowCurrentTime.current],
+            sliderValue: nowCurrentTime.current,
             nowTime: formatTime(nowCurrentTime.current)
           },
         })
@@ -582,8 +582,6 @@ const VideoPlayerView = (props) => {
   //   'showVideo:', showVideo, 'isPaused:', isPaused,
   //   'isSuspended:', isSuspended, 'showPoster:', showPoster
   // )
-
-  // console.log('trackBuffer 1111:', trackBuffer);
 
   return (
     <View {..._panResponder.panHandlers}>
@@ -752,34 +750,26 @@ const VideoPlayerView = (props) => {
                       {nowTime}
                     </Text>
                   </View>
-                  <View style={{ flex: 1 }} onLayout={(e) => {
-                    console.log('aaaaaa:', e.nativeEvent.layout)
-                    dispatch({
-                      type: 'setState',
-                      payload: {
-                        sliderLength: e.nativeEvent.layout.width,
-                      },
-                    })
-                  }}>
+                  <View
+                    style={{ flex: 1 }}
+                    onLayout={(e) => {
+                      // console.log('aaaaaa:', e.nativeEvent.layout)
+                      // 设置进度条长度
+                      dispatch({
+                        type: 'setState',
+                        payload: {
+                          sliderLength: e.nativeEvent.layout.width,
+                        },
+                      })
+                    }}>
                     <MultiSlider
-                      // vertical={true}
-                      // containerStyle={{
-                      //   marginTop: 200 - 30,
-                      //   marginLeft: 20,
-                      //   left: '-50%',
-                      // }}
-                      // trackStyle={{
-                      // height: 6,
-                      // marginTop: -2
-                      // }}
-                      // onValuesChange={(values) => {
-                      // console.log('onValuesChange values:', values)
-                      // }}
+                      vertical={props.isFullScreen}
                       trackBuffer={trackBuffer}
                       values={sliderValue}
                       min={0}
                       max={duration}
                       sliderLength={sliderLength}
+                      containerStyle={{ height: 14 }}
                       markerStyle={{ width: 14, height: 14 }}
                       onValuesChangeFinish={_onFastForward}
                       onValuesChangeStart={() => {

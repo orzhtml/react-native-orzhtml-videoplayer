@@ -11,18 +11,8 @@ import { getStatusBarHeight } from '../common/StatusBarHeight'
 const VideoSpeed = (props) => {
   const [value, setValue] = useState(0)
   const _timerRef = useRef<any>(null)
-  // const [rotate, setRotate] = useState('0deg')
-
-  // useEffect(() => {
-  //   // setRotate('90deg')
-  //   _timerRef.current = setTimeout(() => {
-  //     clearTimeout(_timerRef.current)
-  //     setValue(value + 1)
-  //   }, 1000)
-  //   return () => {
-  //     clearTimeout(_timerRef.current)
-  //   }
-  // }, [value])
+  const [changeRotate, setChangeRotate] = useState(false)
+  const [rotate, setRotate] = useState('0deg')
 
   console.log('value:', value)
   return (
@@ -37,44 +27,54 @@ const VideoSpeed = (props) => {
       >
         <Text>点击</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={{ padding: 5 }}
+        onPress={() => {
+          let _changeRotate = !changeRotate
+          setChangeRotate(_changeRotate)
+          if (_changeRotate) {
+            setRotate('90deg')
+          } else {
+            setRotate('0deg')
+          }
+        }}
+      >
+        <Text>旋转</Text>
+      </TouchableOpacity>
       <View style={{
         backgroundColor: 'red',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         width: 300,
         height: 300,
         marginLeft: 30,
         marginTop: 200,
         transform: [
           {
-            rotate: '90deg',
+            rotate: rotate,
           },
         ],
       }}>
-        <MultiSlider
-          values={[value]}
-          min={0}
-          max={1417}
-          vertical={true}
-          sliderLength={200}
-          // containerStyle={{
-          //   marginTop: 200 - 30,
-          //   marginLeft: 20,
-          //   left: '-50%',
-          // }}
-          // trackStyle={{ height: 6, marginTop: -2 }}
-          markerStyle={{ width: 20, height: 20 }}
-          onValuesChangeFinish={(values) => {
-            console.log('onValuesChangeFinish values:', values)
-            setValue(values)
-          }}
-          onValuesChangeStart={(values) => {
-            console.log('onValuesChangeStart values:', values)
-          }}
-          onValuesChange={(values) => {
-            console.log('onValuesChange values:', values)
-          }}
-        />
+        <View />
+        <View style={{ backgroundColor: 'blue' }}>
+          <MultiSlider
+            values={value}
+            min={0}
+            max={1417}
+            // enableLabel={true}
+            vertical={changeRotate}
+            sliderLength={200}
+            containerStyle={{ height: 14 }}
+            markerStyle={{ width: 14, height: 14 }}
+            onValuesChangeFinish={(values) => {
+              console.log('onValuesChangeFinish values:', values)
+              setValue(values)
+            }}
+            onValuesChangeStart={() => {
+              console.log('onValuesChangeStart')
+            }}
+          />
+        </View>
       </View>
     </View>
   )
