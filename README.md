@@ -11,10 +11,6 @@ react-native video 视频控制组件
 
 `npm install react-native-orzhtml-videoplayer --save` or `yarn add react-native-orzhtml-videoplayer`
 
-`npm install react-native-orientation-locker --save` or `yarn add react-native-orientation-locker`
-
-`npm install react-native-linear-gradient --save` or `yarn add react-native-linear-gradient`
-
 `npm install react-native-video --save` or `yarn add react-native-video`
 
 
@@ -25,18 +21,8 @@ In the react-native-orzhtml-videoplayer package directory:
 ```
 cd example
 
-npm install // or yarn
-
-cd ios/ && pod install
+yarn ins
 ```
-
-To run example on iOS:
-
-`react-native run-ios`
-
-To run example on Android:
-
-`react-native run-android`
 
 ## Props
 

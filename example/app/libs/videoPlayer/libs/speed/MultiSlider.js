@@ -302,11 +302,11 @@ export default class MultiSlider extends React.Component {
               ref={component => (this._marker = component)}
               {...this._panResponder.panHandlers}>
               <Marker
-                enabled={this.props.enabled}
                 pressed={this.state.pressed}
-                markerStyle={this.props.markerStyle}
                 pressedMarkerStyle={this.props.pressedMarkerStyle}
                 disabledMarkerStyle={this.props.disabledMarkerStyle}
+                markerStyle={this.props.markerStyle}
+                enabled={this.props.enabled}
                 currentValue={this.state.value}
                 valuePrefix={this.props.valuePrefix}
                 valueSuffix={this.props.valueSuffix}

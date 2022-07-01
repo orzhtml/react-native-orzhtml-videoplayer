@@ -34,6 +34,14 @@ const Home = (props: any) => {
         >
           <Text style={styles.btnText}>播放器进度条</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            navigation.navigate('UseComView')
+          }}
+        >
+          <Text style={styles.btnText}>useCom</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   )

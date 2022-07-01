@@ -8,6 +8,7 @@ import VideoList from './view/VideoList'
 import ListDetails from './view/ListDetails'
 import VModal from './view/VModal'
 import VideoSpeed from './view/VideoSpeed'
+import UseComView from './view/UseComView'
 
 const RootStack = createStackNavigator()
 
@@ -69,6 +70,15 @@ const Router = () => {
           }}
         />
         <RootStack.Screen name="VideoSpeed" component={VideoSpeed}
+          options={(configs: any) => {
+            const { params } = configs.route
+            return {
+              gestureEnabled: params && params.enableGestures,
+              ...TransitionPresets.SlideFromRightIOS
+            }
+          }}
+        />
+        <RootStack.Screen name="UseComView" component={UseComView}
           options={(configs: any) => {
             const { params } = configs.route
             return {
