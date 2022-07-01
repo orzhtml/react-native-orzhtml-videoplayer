@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import {
   View,
   TouchableOpacity,
   Text,
 } from 'react-native'
-import MultiSlider from '../libs/videoPlayer/libs/speed/MultiSlider';
+import { Slider } from 'react-native-orzhtml-slider';
 
 import { getStatusBarHeight } from '../common/StatusBarHeight'
 
@@ -57,7 +57,7 @@ const VideoSpeed = (props) => {
       }}>
         <View />
         <View style={{ backgroundColor: 'blue' }}>
-          <MultiSlider
+          <Slider
             values={value}
             min={0}
             max={1417}
