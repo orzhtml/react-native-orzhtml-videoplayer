@@ -1,8 +1,8 @@
 {
   "name": "react-native-orzhtml-videoplayer",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "react-native video 视频控制组件",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
