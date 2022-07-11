@@ -5,10 +5,6 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import Home from './view/Home'
 import VideoDetails from './view/VideoDetails'
 import VideoList from './view/VideoList'
-import ListDetails from './view/ListDetails'
-import VModal from './view/VModal'
-import VideoSpeed from './view/VideoSpeed'
-import UseComView from './view/UseComView'
 
 const RootStack = createStackNavigator()
 
@@ -43,42 +39,6 @@ const Router = () => {
           }}
         />
         <RootStack.Screen name="VideoDetails" component={VideoDetails}
-          options={(configs: any) => {
-            const { params } = configs.route
-            return {
-              gestureEnabled: params && params.enableGestures,
-              ...TransitionPresets.SlideFromRightIOS
-            }
-          }}
-        />
-        <RootStack.Screen name="ListDetails" component={ListDetails}
-          options={(configs: any) => {
-            const { params } = configs.route
-            return {
-              gestureEnabled: params && params.enableGestures,
-              ...TransitionPresets.SlideFromRightIOS
-            }
-          }}
-        />
-        <RootStack.Screen name="VModal" component={VModal}
-          options={(configs: any) => {
-            const { params } = configs.route
-            return {
-              gestureEnabled: params && params.enableGestures,
-              ...TransitionPresets.SlideFromRightIOS
-            }
-          }}
-        />
-        <RootStack.Screen name="VideoSpeed" component={VideoSpeed}
-          options={(configs: any) => {
-            const { params } = configs.route
-            return {
-              gestureEnabled: params && params.enableGestures,
-              ...TransitionPresets.SlideFromRightIOS
-            }
-          }}
-        />
-        <RootStack.Screen name="UseComView" component={UseComView}
           options={(configs: any) => {
             const { params } = configs.route
             return {
