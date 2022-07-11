@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useMemo, memo } from "react"
+import React, { useEffect, useRef, useMemo } from "react"
 import { TouchableOpacity, View, Text } from "react-native"
+import { VideoModal } from 'react-native-orzhtml-videoplayer'
 
-import { VideoModal } from '../libs/videoPlayer'
 import { screenWidth } from "../common/Utils"
 
 const VideoCell = (props) => {

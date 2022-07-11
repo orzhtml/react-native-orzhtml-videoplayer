@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { ScrollView, View, Text, TouchableOpacity } from "react-native"
 
-import { VideoModal } from '../libs/videoPlayer'
+import { VideoModal } from 'react-native-orzhtml-videoplayer'
 
 const VideoDetails = (props: any) => {
   const [state, setState] = useState<any>({
