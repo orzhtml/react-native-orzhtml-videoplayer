@@ -1,21 +1,8 @@
 package com.example;
 
 import com.facebook.react.ReactActivity;
-
-// react-native-screens
-import android.os.Bundle;
-// react-native-screens end
-
-// RNGestureHandler
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
-import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
-// RNGestureHandler end
-
-// react-native-orientation-locker
-import android.content.Intent;
-import android.content.res.Configuration;
-// react-native-orientation-locker end
 
 public class MainActivity extends ReactActivity {
 
@@ -28,26 +15,26 @@ public class MainActivity extends ReactActivity {
     return "example";
   }
 
-   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    Intent intent = new Intent("onConfigurationChanged");
-    intent.putExtra("newConfig", newConfig);
-    this.sendBroadcast(intent);
-  }
-
+  /**
+   * Returns the instance of the {@link ReactActivityDelegate}. There the RootView is created and
+   * you can specify the rendered you wish to use (Fabric or the older renderer).
+   */
   @Override
   protected ReactActivityDelegate createReactActivityDelegate() {
-    return new ReactActivityDelegate(this, getMainComponentName()) {
-      @Override
-      protected ReactRootView createRootView() {
-      return new RNGestureHandlerEnabledRootView(MainActivity.this);
-      }
-    };
+    return new MainActivityDelegate(this, getMainComponentName());
   }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(null);
+  public static class MainActivityDelegate extends ReactActivityDelegate {
+    public MainActivityDelegate(ReactActivity activity, String mainComponentName) {
+      super(activity, mainComponentName);
+    }
+
+    @Override
+    protected ReactRootView createRootView() {
+      ReactRootView reactRootView = new ReactRootView(getContext());
+      // If you opted-in for the New Architecture, we enable the Fabric Renderer.
+      reactRootView.setIsFabric(BuildConfig.IS_NEW_ARCHITECTURE_ENABLED);
+      return reactRootView;
+    }
   }
 }
