@@ -1,10 +1,17 @@
-import React from "react"
-import { StatusBar, View } from "react-native"
+import React, { FC } from 'react'
+import { StatusBar, View } from 'react-native'
 
-import { isIOS, statusBarHeight } from "../common/Utils"
+import { isIOS, statusBarHeight } from '../common/Utils'
 
-const Header = (props) => {
+interface HeaderProps {
+  [p: string]: any;
+  statusBar: () => any;
+  statusBarBg: any;
+  barStyle: any;
+  isDark: any;
+}
 
+const Header: FC<HeaderProps> = (props) => {
   if (props.statusBar) {
     return props.statusBar()
   }

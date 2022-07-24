@@ -56,7 +56,7 @@ const getExpoRoot = () => global.Expo || global.__expo || global.__exponent
 
 export const isExpo = () => getExpoRoot() !== undefined
 
-export function getStatusBarHeight(skipAndroid?: any) {
+export function getStatusBarHeight (skipAndroid?: any) {
   return Platform.select({
     ios: statusBarHeight,
     android: skipAndroid ? 0 : StatusBar.currentHeight,

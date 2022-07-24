@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet } from 'react-native'
 
 export const lineStyles = StyleSheet.create({
   videoStyles: {
@@ -75,5 +75,5 @@ export const lineStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 11,
     borderRadius: 6,
-  }
+  },
 })

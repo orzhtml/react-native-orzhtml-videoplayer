@@ -8,7 +8,7 @@ export const screenHeight = Dimensions.get('screen').height
 export const defaultVideoHeight = screenWidth * 9 / 16
 export const defaultVideoWidth = screenWidth
 
-export const formatTime = (second): string => {
+export const formatTime = (second: any): string => {
   let result = second
   let h = Math.floor(result / 3600) < 10 ? '0' + Math.floor(result / 3600) : Math.floor(result / 3600)
   let m = Math.floor((result / 60 % 60)) < 10 ? '0' + Math.floor((result / 60 % 60)) : Math.floor((result / 60 % 60))
@@ -22,19 +22,19 @@ export const formatTime = (second): string => {
   return result
 }
 
-export function isDownGesture(x, y) {
+export function isDownGesture (x: number, y: number) {
   return y > 0 && (y > Math.abs(x))
 }
 
-export function isUpGesture(x, y) {
+export function isUpGesture (x: number, y: number) {
   return y < 0 && (Math.abs(x) < Math.abs(y))
 }
 
-export function isHorizontalGesture(x, y) {
+export function isHorizontalGesture (x: number, y: number) {
   return (Math.abs(x) < Math.abs(y))
 }
 
-export function isClickGesture(x, y) {
+export function isClickGesture (x: number, y: number) {
   return x === 0 && y === 0
 }
 
