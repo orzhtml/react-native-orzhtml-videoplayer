@@ -1,9 +1,9 @@
 import React from 'react'
 import { View, ActivityIndicator, Text } from 'react-native'
 
-import {  lineStyles} from './styles'
+import { lineStyles } from './styles'
 
-function Loading ({ showLoading, videoHeight, videoWidth }) {
+function Loading ({ showLoading, videoHeight, videoWidth }: any) {
   if (!showLoading) {
     return null
   }

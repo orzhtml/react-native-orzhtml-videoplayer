@@ -35,7 +35,7 @@ const initialState = {
   sliderLength: 200, // 进度条默认长度
 }
 
-function VPlayerReducer(state: any, action: { type: string; payload: object }) {
+function VPlayerReducer (state: any, action: { type: string; payload: object }) {
   switch (action.type) {
     case 'reset':
       return initialState

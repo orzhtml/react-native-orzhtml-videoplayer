@@ -17,6 +17,11 @@ react-native video 视频控制组件
 
 `yarn add react-native-modal`
 
+# 提示
+
+如果 react-native 0.69 + 以上版本，react-native-video 需要升级到 v6.0.0 以上
+
+`yarn add react-native-video@v6.0.0-alpha.1`
 
 ## 例子
 

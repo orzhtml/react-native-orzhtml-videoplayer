@@ -1,4 +1,5 @@
-import { ImageSourcePropType } from "react-native"
+/* eslint-disable camelcase */
+import { ImageSourcePropType } from 'react-native'
 
 const Images: {
   icon_back: ImageSourcePropType;

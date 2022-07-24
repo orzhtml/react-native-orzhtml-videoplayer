@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect } from 'react'
 
-function useTimeout(fn: () => void, delay: number) {
+function useTimeout (fn: () => void, delay: number) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      fn();
+      fn()
     }, delay)
     return () => {
       clearTimeout(timer)
@@ -11,10 +11,10 @@ function useTimeout(fn: () => void, delay: number) {
   }, [fn, delay])
 }
 
-function useInterval(fn: () => void, delay: number) {
+function useInterval (fn: () => void, delay: number) {
   useEffect(() => {
     const timer = setInterval(() => {
-      fn();
+      fn()
     }, delay)
     return () => {
       clearInterval(timer)
