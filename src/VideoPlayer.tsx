@@ -733,6 +733,7 @@ const VideoPlayerView: FC<VideoPlayerProps> = (props) => {
                 style={[lineStyles.headerBarStyle, {
                   borderTopLeftRadius: props.videoBarRadius,
                   borderTopRightRadius: props.videoBarRadius,
+                  paddingLeft: props.isFullScreen ? 40 : 0,
                   paddingTop: props.isFullScreen ? 30 : props.statusBarTrans ? statusBarHeight + 10 : 10,
                 }, props.headerBarStyle]}
               >
@@ -767,6 +768,7 @@ const VideoPlayerView: FC<VideoPlayerProps> = (props) => {
                   backgroundColor: 'rgba(0,0,0,0.4)',
                   borderBottomRightRadius: props.videoBarRadius,
                   borderBottomLeftRadius: props.videoBarRadius,
+                  paddingLeft: props.isFullScreen ? 40 : 0,
                 }, props.footerBarStyle]}
               >
                 <View
